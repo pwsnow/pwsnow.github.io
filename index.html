@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Early Health Economic Analysis of Virtual Reality Therapy for Postoperative Pain Management">
+    <title>VR Therapy Health Economic Evaluation</title>
+    <!-- Modern Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- KaTeX for Academic LaTeX Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <!-- Chart.js & Mermaid -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="js/model.js" defer></script>
+    <script src="js/app.js" defer></script>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <h1>VR Health Economic Analysis</h1>
+            <p>Postoperative Pain Management Simulation Model (1-Year Horizon)</p>
+        </div>
+    </header>
+
+    
+    <nav class="tab-nav" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            <button class="tab-btn active" id="btnTabVr">VR Model (Paper)</button>
+            <button class="tab-btn" id="btnTabAdv">VR + Robotics Sandbox</button>
+            <button class="tab-btn" id="btnTabPlp">PLP (Phantom Limb Pain)</button>
+            <button class="tab-btn" id="btnTabHta">NICE & UK HTA Pathways</button>
+            <button class="tab-btn" id="btnTabEquations">Methodology & Equations</button>
+            <button class="tab-btn" id="btnTabTable">Table 1 (Edit Parameters)</button>
+            <button class="tab-btn" id="btnTabSocietal">Societal Impact Analysis</button>
+        </div>
+        <button id="btnExportCsv" class="btn" style="background:rgba(16,185,129,0.15); border:1px solid var(--success); color:#fff; cursor:pointer; padding:0.4rem 0.8rem; border-radius:6px; font-weight:bold; font-size:0.85rem; display:flex; align-items:center; gap:0.3rem;" title="Export all active parameters and model results to a CSV file">📥 Export System Data (CSV)</button>
+    </nav>
+<main class="dashboard tab-content active" id="tab-vr">
+
+        <!-- Sidebar Inputs -->
+        <aside class="glass-panel inputs-panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+                <h2>Model Parameters</h2>
+                <div class="currency-toggle" style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 0.25rem;">
+                    <button class="btn-preset active" id="btnEur" style="border:none; border-radius:4px; padding:0.25rem 0.5rem; background:transparent; color:var(--text-secondary); font-weight:bold;">EUR (£)</button>
+                    <button class="btn-preset" id="btnGbp" style="border:none; border-radius:4px; padding:0.25rem 0.5rem; background:var(--accent-primary); color:#fff; font-weight:bold;">GBP (£)</button>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="wtp">Willingness to Pay (WTP) per QALY (£)</label>
+                <input type="number" id="wtp" value="20000" step="1000">
+            </div>
+
+            <div class="input-group">
+                <label for="vrCost">VR Therapy Cost per Patient (£)</label>
+                <div class="slider-container">
+                    <input type="number" id="vrCostNum" min="0" max="100000" value="40.55" step="0.01" class="sync-input">
+                    <input type="range" id="vrCost" min="0" max="100000" value="40.55" step="0.01">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="opioidReduction">Opioid Use Reduction at Discharge (%)</label>
+                <div class="slider-container">
+                    <input type="number" id="opioidReductionNum" min="0" max="100" value="2.8" step="0.1" class="sync-input">
+                    <input type="range" id="opioidReduction" min="0" max="100" value="2.8" step="0.1">
+                </div>
+                <div class="preset-buttons" style="display:flex; gap:0.5rem; margin-top:0.2rem;">
+                    <button class="btn-preset" id="presetCostEffective" title="Journal Target: Cost-Effective Threshold">Cost-Effective (2.5%)</button>
+                    <button class="btn-preset" id="presetCostSaving" title="Journal Target: Cost-Saving Threshold">Cost-Saving (6.5%)</button>
+                </div>
+                <button id="btnCalcThresholds" class="btn btn-preset" style="width:100%; margin-top:0.5rem; background:rgba(56,189,248,0.15); border:1px solid var(--accent-primary); color:#fff; cursor:pointer; text-align:center; padding:0.4rem;">🔍 Calculate Custom Thresholds</button>
+            </div>
+
+            <div class="input-group">
+                <label for="cpspRisk">Baseline CPSP Risk (%)</label>
+                <div class="slider-container">
+                    <input type="number" id="cpspRiskNum" min="0" max="100" value="15" step="1" class="sync-input">
+                    <input type="range" id="cpspRisk" min="0" max="100" value="15" step="1">
+                </div>
+            </div>
+
+            
+            <details class="advanced-settings" style="margin-top:0.5rem; border:none;">
+                <summary>CE Plane Axis Ranges</summary>
+                <div class="advanced-grid">
+                    <div class="input-group"><label>X Min (QALY)</label><input type="number" id="ceXMin" value="-2" step="0.5"></div>
+                    <div class="input-group"><label>X Max (QALY)</label><input type="number" id="ceXMax" value="10" step="0.5"></div>
+                    <div class="input-group"><label>Y Min (Cost)</label><input type="number" id="ceYMin" value="-100000" step="10000"></div>
+                    <div class="input-group"><label>Y Max (Cost)</label><input type="number" id="ceYMax" value="100000" step="10000"></div>
+                </div>
+            </details>
+            <div class="action-card">
+
+                <p class="status-indicator">
+                    <span id="costEffectiveStatus">Calculating...</span>
+                </p>
+                <button id="resetBtn" class="btn btn-secondary">Reset to Baseline</button>
+            </div>
+            
+            <div class="summary-text" id="summaryAnalysis">
+                <p>Loading summary...</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <section class="results-area">
+            
+            <!-- KPIs -->
+            <div class="kpi-grid">
+                <div class="kpi-card glass-panel">
+                    <h3>Incremental Cost (ΔC)</h3>
+                    <div class="value" id="kpiIncCost">--</div>
+                    <div class="subtitle">VR vs. Standard Care</div>
+                </div>
+                <div class="kpi-card glass-panel">
+                    <h3>Incremental QALY (ΔE)</h3>
+                    <div class="value" id="kpiIncQaly">--</div>
+                    <div class="subtitle">VR vs. Standard Care</div>
+                </div>
+                <div class="kpi-card glass-panel highlight">
+                    <h3>ICER</h3>
+                    <div class="value" id="kpiIcer">--</div>
+                    <div class="subtitle">Cost per QALY gained</div>
+                </div>
+                <div class="kpi-card glass-panel">
+                    <h3>Net Monetary Benefit</h3>
+                    <div class="value" id="kpiNmb">--</div>
+                    <div class="subtitle">At current WTP threshold</div>
+                </div>
+            </div>
+
+            <!-- Charts Row 1: Headroom & Tornado (Sensitivity) -->
+            <div class="charts-row">
+                <div class="chart-container glass-panel half-width">
+                    <div class="chart-header">
+                        <h2>Headroom Analysis (Max Cost)</h2>
+                        <button class="btn btn-icon" id="downloadHeadroomBtn" title="Export as PNG">Export</button>
+                    </div>
+                    <canvas id="headroomChart"></canvas>
+                </div>
+
+                <div class="chart-container glass-panel half-width">
+                    <div class="chart-header">
+                        <h2>One-Way Sensitivity (Tornado)</h2>
+                        <button class="btn btn-icon" id="downloadTornadoBtn" title="Export as PNG">Export</button>
+                    </div>
+                    <canvas id="tornadoChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Charts Row 2: CE Plane & Markov Diagram -->
+            <div class="charts-row">
+                <div class="chart-container glass-panel half-width">
+                    <div class="chart-header">
+                        <h2>Probabilistic CE Plane (Scatter)</h2>
+                        <button class="btn btn-icon" id="downloadCeBtn" title="Export as PNG">Export</button>
+                    </div>
+                    <canvas id="cePlaneChart"></canvas>
+                </div>
+
+                <div class="chart-container glass-panel half-width">
+                    <div class="chart-header">
+                        <h2>1-Year Markov Model Structure</h2>
+                    </div>
+                    <div class="mermaid" style="background:transparent; text-align:center; flex:1; display:flex; justify-content:center; align-items:center;">
+                        flowchart TB
+                            classDef default fill:transparent,stroke:#38bdf8,color:#f8fafc
+                            D[Discharge] -->|Baseline %| O[Opioids]
+                            D -->|Baseline %| NO[Non-Opioids]
+                            O --> PF[Pain-Free]
+                            O --> C[CPSP]
+                            O --> X[Death]
+                            NO --> PF
+                            NO --> C
+                            NO --> X
+                            PF --> X
+                            C --> X
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+<main class="dashboard tab-content " id="tab-adv">
+
+        <!-- Sidebar Inputs -->
+        <aside class="glass-panel inputs-panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+                <h2>Model Parameters</h2>
+                <div class="currency-toggle" style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 0.25rem;">
+                    <button class="btn-preset active" id="btnEurAdv" style="border:none; border-radius:4px; padding:0.25rem 0.5rem; background:transparent; color:var(--text-secondary); font-weight:bold;">EUR (£)</button>
+                    <button class="btn-preset" id="btnGbpAdv" style="border:none; border-radius:4px; padding:0.25rem 0.5rem; background:var(--accent-primary); color:#fff; font-weight:bold;">GBP (£)</button>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label for="wtpAdv" style="margin-bottom:0;">Willingness to Pay (WTP) per QALY (£)</label>
+                    <button id="btnNhsWtpAdv" class="btn btn-preset" style="padding: 0.15rem 0.4rem; font-size: 0.7rem; background: var(--accent-primary); border: none; border-radius: 4px; color: #fff; cursor: pointer; margin-bottom: 0.2rem;" title="Set standard NHS cost-effectiveness threshold (as of April 2026)">NHS (£25k)</button>
+                </div>
+                <input type="number" id="wtpAdv" value="20000" step="1000">
+            </div>
+
+            <div class="input-group">
+                <label for="vrCostAdv">VR Therapy Cost per Patient (£)</label>
+                <div class="slider-container">
+                    <input type="number" id="vrCostNumAdv" min="0" max="100000" value="40.55" step="0.01" class="sync-input">
+                    <input type="range" id="vrCostAdv" min="0" max="100000" value="40.55" step="0.01">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="opioidReductionAdv">Opioid Use Reduction at Discharge (%)</label>
+                <div class="slider-container">
+                    <input type="number" id="opioidReductionNumAdv" min="0" max="100" value="2.8" step="0.1" class="sync-input">
+                    <input type="range" id="opioidReductionAdv" min="0" max="100" value="2.8" step="0.1">
+                </div>
+                <div class="preset-buttons" style="display:flex; gap:0.5rem; margin-top:0.2rem;">
+                    <button class="btn-preset" id="presetCostEffectiveAdv" title="Journal Target: Cost-Effective Threshold">Cost-Effective (2.5%)</button>
+                    <button class="btn-preset" id="presetCostSavingAdv" title="Journal Target: Cost-Saving Threshold">Cost-Saving (6.5%)</button>
+                </div>
+                <button id="btnCalcThresholdsAdv" class="btn btn-preset" style="width:100%; margin-top:0.5rem; background:rgba(56,189,248,0.15); border:1px solid var(--accent-primary); color:#fff; cursor:pointer; text-align:center; padding:0.4rem;">🔍 Calculate Custom Thresholds</button>
+            </div>
+
+            <div class="input-group">
+                <label for="cpspRiskAdv">Baseline CPSP Risk (%)</label>
+                <div class="slider-container">
+                    <input type="number" id="cpspRiskNumAdv" min="0" max="100" value="15" step="1" class="sync-input">
+                    <input type="range" id="cpspRiskAdv" min="0" max="100" value="15" step="1">
+                </div>
+            </div>
+
+            
+            <div class="action-card" style="margin-top:0.5rem; padding-top:0.5rem; border:none;">
+                <details class="advanced-settings">
+                    <summary>Advanced Cost Breakdown</summary>
+                    <div class="advanced-grid" style="grid-template-columns: 1fr; display:grid;">
+                        <div class="input-group"><label>One-off Capital/Setup Cost</label><input type="number" id="oneOffCostAdv" value="0" step="10"></div>
+                        <div class="input-group"><label>Per-session Cost</label><input type="number" id="sessionCostAdv" value="0" step="5"></div>
+                        <div class="input-group"><label>Number of Sessions</label><input type="number" id="numSessionsAdv" value="1" step="1"></div>
+                        <div class="input-group"><label>Assumed Patients per System</label><input type="number" id="patientsPerSystemAdv" value="100" min="1" step="1"></div>
+                        <p style="font-size:0.75rem; color:#cbd5e1; margin-top:0.25rem;">(These dynamically add to the VR Therapy Base Cost above)</p>
+                    </div>
+                </details>
+
+                <details class="advanced-settings">
+                    <summary>Base Utilities & Cost Overrides</summary>
+                    <div class="advanced-grid" style="grid-template-columns: 1fr 1fr; display:grid;">
+                        <div class="input-group"><label>Util: PF</label><input type="number" id="utilPfAdv" value="1.0" step="0.05"></div>
+                        <div class="input-group"><label>Util: NonOp</label><input type="number" id="utilNonOpAdv" value="0.93" step="0.05"></div>
+                        <div class="input-group"><label>Util: Opioid</label><input type="number" id="utilOpioidAdv" value="0.61" step="0.05"></div>
+                        <div class="input-group"><label>Util: CPSP</label><input type="number" id="utilCpspAdv" value="0.59" step="0.05"></div>
+                        <div class="input-group"><label>Cost Override: NonOp (£)</label><input type="number" id="costNonOpAdv" placeholder="Compute dynamic" step="10"></div>
+                        <div class="input-group"><label>Cost Override: Opioid (£)</label><input type="number" id="costOpioidAdv" placeholder="Compute dynamic" step="10"></div>
+                        <div class="input-group"><label>Cost Override: CPSP (£)</label><input type="number" id="costCpspAdv" placeholder="Compute dynamic" step="10"></div>
+                    </div>
+                </details>
+
+                <details class="advanced-settings">
+                    <summary>Societal Cost Components (£)</summary>
+                    <div class="advanced-grid" style="grid-template-columns: 1fr 1fr; display:grid;">
+                        <div class="input-group"><label>GP visit cost</label><input type="number" id="costGPAdv" value="32.04" step="1"></div>
+                        <div class="input-group"><label>Specialist visit</label><input type="number" id="costSpecialistAdv" value="225.00" step="5"></div>
+                        <div class="input-group"><label>Specialist CPSP</label><input type="number" id="costChronicCareAdv" value="119.51" step="5"></div>
+                        <div class="input-group"><label>Caregiver hr cost</label><input type="number" id="costCaregiverAdv" value="19.51" step="1"></div>
+                        <div class="input-group"><label>Drug: Opioid (Stable)</label><input type="number" id="drugCostOpioidStableAdv" value="0.35" step="0.05"></div>
+                        <div class="input-group"><label>Drug: Opioid (Decr)</label><input type="number" id="drugCostOpioidDecreaseAdv" value="0.24" step="0.05"></div>
+                        <div class="input-group"><label>Drug: Paracetamol</label><input type="number" id="drugCostParacetamolAdv" value="0.03" step="0.01"></div>
+                    </div>
+                </details>
+
+                <details class="advanced-settings">
+                    <summary>Model Transition Probabilities</summary>
+                    <div class="advanced-grid" style="grid-template-columns: 1fr 1fr; display:grid;">
+                        <div class="input-group"><label>Opioid -> PF (Month 2)</label><input type="number" id="transOpioidPF_m2Adv" value="0.4841" step="0.01"></div>
+                        <div class="input-group"><label>Opioid -> NonOp (M2)</label><input type="number" id="transOpioidNonOp_m2Adv" value="0.2937" step="0.01"></div>
+                        <div class="input-group"><label>NonOp -> PF (Month 3)</label><input type="number" id="transNonOpPF_m3Adv" value="0.7297" step="0.01"></div>
+                        <div class="input-group"><label>NonOp -> Opioid (M1)</label><input type="number" id="transNonOpOp_m1Adv" value="0.1299" step="0.01"></div>
+                        <div class="input-group"><label>CPSP -> PF</label><input type="number" id="transCpspPFAdv" value="0.0286" step="0.005"></div>
+                        <div class="input-group"><label>Opioid -> NonOp (M3)</label><input type="number" id="transOpioidNonOp_m3Adv" value="0.4643" step="0.01"></div>
+                        <div class="input-group"><label>PF -> NonOp (Month 1)</label><input type="number" id="transPfNonOp_m1Adv" value="0.1176" step="0.01"></div>
+                    </div>
+                </details>
+
+                <details class="advanced-settings">
+                    <summary>Demographics & Caregiver Hours</summary>
+                    <div class="advanced-grid" style="grid-template-columns: 1fr 1fr; display:grid;">
+                        <div class="input-group"><label>Population Age</label><input type="number" id="popAgeAdv" value="65" step="1"></div>
+                        <div class="input-group"><label>Percentage Male</label><input type="number" id="pctMaleAdv" value="0.50" step="0.05"></div>
+                        <div class="input-group"><label>Caregiver hrs (CPSP)</label><input type="number" id="informalCareCPSPAdv" value="20" step="1"></div>
+                        <div class="input-group"><label>Caregiver hrs (Opioid)</label><input type="number" id="informalCareOpioidAdv" value="20" step="1"></div>
+                        <div class="input-group"><label>Caregiver hrs (NonOp)</label><input type="number" id="informalCareNonOpioidAdv" value="8" step="1"></div>
+                    </div>
+                </details>
+            </div>
+
+
+                <details class="advanced-settings">
+                    <summary>Chart Axis Ranges</summary>
+                    <div class="advanced-grid" style="grid-template-columns: 1fr 1fr; display:grid;">
+                        <div class="input-group"><label>X Min (QALY)</label><input type="number" id="ceXMinAdv" value="-2" step="0.5"></div>
+                        <div class="input-group"><label>X Max (QALY)</label><input type="number" id="ceXMaxAdv" value="10" step="0.5"></div>
+                        <div class="input-group"><label>Y Min (Cost)</label><input type="number" id="ceYMinAdv" value="-100000" step="10000"></div>
+                        <div class="input-group"><label>Y Max (Cost)</label><input type="number" id="ceYMaxAdv" value="100000" step="10000"></div>
+                        <div class="input-group" style="grid-column: span 2;"><label>Headroom Max X (%)</label><input type="number" id="headroomMaxXAdv" value="100" min="5" max="100" step="5"></div>
+                    </div>
+                </details>
+            </div>
+
+                <p class="status-indicator">
+                    <span id="costEffectiveStatusAdv">Calculating...</span>
+                </p>
+                <button id="resetBtnAdv" class="btn btn-secondary">Reset to Baseline</button>
+            </div>
+            
+            <div class="summary-text" id="summaryAnalysisAdv">
+                <p>Loading summary...</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <section class="results-area">
+            
+            <!-- KPIs -->
+            <div class="kpi-grid">
+                <div class="kpi-card glass-panel">
+                    <h3>Incremental Cost (ΔC)</h3>
+                    <div class="value" id="kpiIncCostAdv">--</div>
+                    <div class="subtitle">VR vs. Standard Care</div>
+                </div>
+                <div class="kpi-card glass-panel">
+                    <h3>Incremental QALY (ΔE)</h3>
+                    <div class="value" id="kpiIncQalyAdv">--</div>
+                    <div class="subtitle">VR vs. Standard Care</div>
+                </div>
+                <div class="kpi-card glass-panel highlight">
+                    <h3>ICER</h3>
+                    <div class="value" id="kpiIcerAdv">--</div>
+                    <div class="subtitle">Cost per QALY gained</div>
+                </div>
+                <div class="kpi-card glass-panel">
+                    <h3>Net Monetary Benefit</h3>
+                    <div class="value" id="kpiNmbAdv">--</div>
+                    <div class="subtitle">At current WTP threshold</div>
+                </div>
+            </div>
+
+            <!-- Charts Row 1: Headroom & Tornado (Sensitivity) -->
+            <div class="charts-row">
+                <div class="chart-container glass-panel half-width">
+                    <div class="chart-header">
+                        <h2>Headroom Analysis (Max Cost)</h2>
+                        <button class="btn btn-icon" id="downloadHeadroomBtnAdv" title="Export as PNG">Export</button>
+                    </div>
+                    <canvas id="headroomChartAdv"></canvas>
+                </div>
+
+                <div class="chart-container glass-panel half-width">
+                    <div class="chart-header">
+                        <h2>One-Way Sensitivity (Tornado)</h2>
+                        <button class="btn btn-icon" id="downloadTornadoBtnAdv" title="Export as PNG">Export</button>
+                    </div>
+                    <canvas id="tornadoChartAdv"></canvas>
+                </div>
+            </div>
+
+            <!-- Charts Row 2: CE Plane & Markov Diagram -->
+            <div class="charts-row">
+                <div class="chart-container glass-panel half-width">
+                    <div class="chart-header">
+                        <h2>Probabilistic CE Plane (Scatter)</h2>
+                        <button class="btn btn-icon" id="downloadCeBtnAdv" title="Export as PNG">Export</button>
+                    </div>
+                    <canvas id="cePlaneChartAdv"></canvas>
+                </div>
+
+                <div class="chart-container glass-panel half-width">
+                    <div class="chart-header">
+                        <h2>1-Year Markov Model Structure</h2>
+                    </div>
+                    <div class="mermaid" style="background:transparent; text-align:center; flex:1; display:flex; justify-content:center; align-items:center;">
+                        flowchart TB
+                            classDef default fill:transparent,stroke:#38bdf8,color:#f8fafc
+                            D[Discharge] -->|Baseline %| O[Opioids]
+                            D -->|Baseline %| NO[Non-Opioids]
+                            O --> PF[Pain-Free]
+                            O --> C[CPSP]
+                            O --> X[Death]
+                            NO --> PF
+                            NO --> C
+                            NO --> X
+                            PF --> X
+                            C --> X
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- WRAPPER 2.5: PLP SANDBOX -->
+<main class="dashboard tab-content " id="tab-plp">
+
+        <!-- Sidebar Inputs -->
+        <aside class="glass-panel inputs-panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+                <h2>Model Parameters</h2>
+                <div class="currency-toggle" style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 0.25rem;">
+                    <button class="btn-preset active" id="btnEurPlp" style="border:none; border-radius:4px; padding:0.25rem 0.5rem; background:transparent; color:var(--text-secondary); font-weight:bold;">EUR (£)</button>
+                    <button class="btn-preset" id="btnGbpPlp" style="border:none; border-radius:4px; padding:0.25rem 0.5rem; background:var(--accent-primary); color:#fff; font-weight:bold;">GBP (£)</button>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label for="wtpPlp" style="margin-bottom:0;">Willingness to Pay (WTP) per QALY (£)</label>
+                    <button id="btnNhsWtpPlp" class="btn btn-preset" style="padding: 0.15rem 0.4rem; font-size: 0.7rem; background: var(--accent-primary); border: none; border-radius: 4px; color: #fff; cursor: pointer; margin-bottom: 0.2rem;" title="Set standard NHS cost-effectiveness threshold (as of April 2026)">NHS (£25k)</button>
+                </div>
+                <input type="number" id="wtpPlp" value="20000" step="1000">
+            </div>
+
+            <div class="input-group">
+                <label for="vrCostPlp">VR Therapy Cost per Patient (£)</label>
+                <div class="slider-container">
+                    <input type="number" id="vrCostNumPlp" min="0" max="100000" value="40.55" step="0.01" class="sync-input">
+                    <input type="range" id="vrCostPlp" min="0" max="100000" value="40.55" step="0.01">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="painReductionPlp">Pain Reduction (%)</label>
+                <div class="slider-container">
+                    <input type="number" id="painReductionNumPlp" min="0" max="100" value="2.8" step="0.1" class="sync-input">
+                    <input type="range" id="painReductionPlp" min="0" max="100" value="2.8" step="0.1">
+                </div>
+                <div class="preset-buttons" style="display:flex; gap:0.5rem; margin-top:0.2rem;">
+                    <button class="btn-preset" id="presetCostEffectivePlp" title="Journal Target: Cost-Effective Threshold">Cost-Effective (2.5%)</button>
+                    <button class="btn-preset" id="presetCostSavingPlp" title="Journal Target: Cost-Saving Threshold">Cost-Saving (6.5%)</button>
+                </div>
+                <button id="btnCalcThresholdsPlp" class="btn btn-preset" style="width:100%; margin-top:0.5rem; background:rgba(56,189,248,0.15); border:1px solid var(--accent-primary); color:#fff; cursor:pointer; text-align:center; padding:0.4rem;">🔍 Calculate Custom Thresholds</button>
+            </div>
+
+            <div class="input-group">
+                <label for="plpRiskPlp">Phantom Limb Pain Risk (%)</label>
+                <div class="slider-container">
+                    <input type="number" id="plpRiskNumPlp" min="0" max="100" value="15" step="1" class="sync-input">
+                    <input type="range" id="plpRiskPlp" min="0" max="100" value="15" step="1">
+                </div>
+            </div>
+
+            
+            <div class="action-card" style="margin-top:0.5rem; padding-top:0.5rem; border:none;">
+                <details class="plpanced-settings">
+                    <summary>Plpanced Cost Breakdown</summary>
+                    <div class="plpanced-grid" style="grid-template-columns: 1fr; display:grid;">
+                        <div class="input-group"><label>One-off Capital/Setup Cost</label><input type="number" id="oneOffCostPlp" value="0" step="10"></div>
+                        <div class="input-group"><label>Per-session Cost</label><input type="number" id="sessionCostPlp" value="0" step="5"></div>
+                        <div class="input-group"><label>Number of Sessions</label><input type="number" id="numSessionsPlp" value="1" step="1"></div>
+                        <button class="btn-preset" id="btnCalcSystemBudgetPlp" style="width:100%; margin-top:0.75rem; background:rgba(168,85,247,0.2); border:1px solid #a855f7; color:#c084fc; font-weight:bold; padding:0.5rem; border-radius:6px; cursor:pointer; font-size:0.85rem; transition:all 0.2s;">📊 Solve Capital Budget Range</button>
+                        <div class="input-group"><label>Assumed Patients per System</label><input type="number" id="patientsPerSystemPlp" value="100" min="1" step="1"></div>
+                        <p style="font-size:0.75rem; color:#cbd5e1; margin-top:0.25rem;">(These dynamically add to the VR Therapy Base Cost above)</p>
+                    </div>
+                </details>
+
+                <details class="plpanced-settings">
+                    <summary>Base Utilities & Cost Overrides</summary>
+                    <div class="plpanced-grid" style="grid-template-columns: 1fr 1fr; display:grid;">
+                        <div class="input-group"><label>Util: PF</label><input type="number" id="utilPfPlp" value="1.0" step="0.05"></div>
+                        <div class="input-group"><label>Util: NonOp</label><input type="number" id="utilNonOpPlp" value="0.93" step="0.05"></div>
+                        <div class="input-group"><label>Util: Opioid</label><input type="number" id="utilOpioidPlp" value="0.61" step="0.05"></div>
+                        <div class="input-group"><label>Util: CPSP</label><input type="number" id="utilCpspPlp" value="0.59" step="0.05"></div>
+                        <div class="input-group"><label>Cost Override: NonOp (£)</label><input type="number" id="costNonOpPlp" placeholder="Compute dynamic" step="10"></div>
+                        <div class="input-group"><label>Cost Override: Opioid (£)</label><input type="number" id="costOpioidPlp" placeholder="Compute dynamic" step="10"></div>
+                        <div class="input-group"><label>Cost Override: CPSP (£)</label><input type="number" id="costCpspPlp" placeholder="Compute dynamic" step="10"></div>
+                    </div>
+                </details>
+
+                <details class="plpanced-settings">
+                    <summary>Societal Cost Components (£)</summary>
+                    <div class="plpanced-grid" style="grid-template-columns: 1fr 1fr; display:grid;">
+                        <div class="input-group"><label>GP visit cost</label><input type="number" id="costGPPlp" value="32.04" step="1"></div>
+                        <div class="input-group"><label>Specialist visit</label><input type="number" id="costSpecialistPlp" value="225.00" step="5"></div>
+                        <div class="input-group"><label>Specialist CPSP</label><input type="number" id="costChronicCarePlp" value="119.51" step="5"></div>
+                        <div class="input-group"><label>Caregiver hr cost</label><input type="number" id="costCaregiverPlp" value="19.51" step="1"></div>
+                        <div class="input-group"><label>Drug: Opioid (Stable)</label><input type="number" id="drugCostOpioidStablePlp" value="0.35" step="0.05"></div>
+                        <div class="input-group"><label>Drug: Opioid (Decr)</label><input type="number" id="drugCostOpioidDecreasePlp" value="0.24" step="0.05"></div>
+                        <div class="input-group"><label>Drug: Paracetamol</label><input type="number" id="drugCostParacetamolPlp" value="0.03" step="0.01"></div>
+                    </div>
+                </details>
+
+                <details class="plpanced-settings">
+                    <summary>Model Transition Probabilities</summary>
+                    <div class="plpanced-grid" style="grid-template-columns: 1fr 1fr; display:grid;">
+                        <div class="input-group"><label>Opioid -> PF (Month 2)</label><input type="number" id="transOpioidPF_m2Plp" value="0.4841" step="0.01"></div>
+                        <div class="input-group"><label>Opioid -> NonOp (M2)</label><input type="number" id="transOpioidNonOp_m2Plp" value="0.2937" step="0.01"></div>
+                        <div class="input-group"><label>NonOp -> PF (Month 3)</label><input type="number" id="transNonOpPF_m3Plp" value="0.7297" step="0.01"></div>
+                        <div class="input-group"><label>NonOp -> Opioid (M1)</label><input type="number" id="transNonOpOp_m1Plp" value="0.1299" step="0.01"></div>
+                        <div class="input-group"><label>CPSP -> PF</label><input type="number" id="transCpspPFPlp" value="0.0286" step="0.005"></div>
+                        <div class="input-group"><label>Opioid -> NonOp (M3)</label><input type="number" id="transOpioidNonOp_m3Plp" value="0.4643" step="0.01"></div>
+                        <div class="input-group"><label>PF -> NonOp (Month 1)</label><input type="number" id="transPfNonOp_m1Plp" value="0.1176" step="0.01"></div>
+                    </div>
+                </details>
+
+                <details class="plpanced-settings">
+                    <summary>Demographics & Caregiver Hours</summary>
+                    <div class="plpanced-grid" style="grid-template-columns: 1fr 1fr; display:grid;">
+                        <div class="input-group"><label>Population Age</label><input type="number" id="popAgePlp" value="65" step="1"></div>
+                        <div class="input-group"><label>Percentage Male</label><input type="number" id="pctMalePlp" value="0.50" step="0.05"></div>
+                        <div class="input-group"><label>Caregiver hrs (CPSP)</label><input type="number" id="informalCareCPSPPlp" value="20" step="1"></div>
+                        <div class="input-group"><label>Caregiver hrs (Opioid)</label><input type="number" id="informalCareOpioidPlp" value="20" step="1"></div>
+                        <div class="input-group"><label>Caregiver hrs (NonOp)</label><input type="number" id="informalCareNonOpioidPlp" value="8" step="1"></div>
+                    </div>
+                </details>
+            </div>
+
+
+                <details class="plpanced-settings">
+                    <summary>Chart Axis Ranges</summary>
+                    <div class="plpanced-grid" style="grid-template-columns: 1fr 1fr; display:grid;">
+                        <div class="input-group"><label>X Min (QALY)</label><input type="number" id="ceXMinPlp" value="-2" step="0.5"></div>
+                        <div class="input-group"><label>X Max (QALY)</label><input type="number" id="ceXMaxPlp" value="10" step="0.5"></div>
+                        <div class="input-group"><label>Y Min (Cost)</label><input type="number" id="ceYMinPlp" value="-100000" step="10000"></div>
+                        <div class="input-group"><label>Y Max (Cost)</label><input type="number" id="ceYMaxPlp" value="100000" step="10000"></div>
+                        <div class="input-group" style="grid-column: span 2;"><label>Headroom Max X (%)</label><input type="number" id="headroomMaxXPlp" value="100" min="5" max="100" step="5"></div>
+                    </div>
+                </details>
+            </div>
+
+                <p class="status-indicator">
+                    <span id="costEffectiveStatusPlp">Calculating...</span>
+                </p>
+                <button id="resetBtnPlp" class="btn btn-secondary">Reset to Baseline</button>
+            </div>
+            
+            <div class="summary-text" id="summaryAnalysisPlp">
+                <p>Loading summary...</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <section class="results-area">
+            
+            <!-- KPIs -->
+            <div class="kpi-grid">
+                <div class="kpi-card glass-panel">
+                    <h3>Incremental Cost (ΔC)</h3>
+                    <div class="value" id="kpiIncCostPlp">--</div>
+                    <div class="subtitle">VR vs. Standard Care</div>
+                </div>
+                <div class="kpi-card glass-panel">
+                    <h3>Incremental QALY (ΔE)</h3>
+                    <div class="value" id="kpiIncQalyPlp">--</div>
+                    <div class="subtitle">VR vs. Standard Care</div>
+                </div>
+                <div class="kpi-card glass-panel highlight">
+                    <h3>ICER</h3>
+                    <div class="value" id="kpiIcerPlp">--</div>
+                    <div class="subtitle">Cost per QALY gained</div>
+                </div>
+                <div class="kpi-card glass-panel">
+                    <h3>Net Monetary Benefit</h3>
+                    <div class="value" id="kpiNmbPlp">--</div>
+                    <div class="subtitle">At current WTP threshold</div>
+                </div>
+            </div>
+
+            <!-- Charts Row 1: Headroom & Tornado (Sensitivity) -->
+            <div class="charts-row">
+                <div class="chart-container glass-panel half-width">
+                    <div class="chart-header">
+                        <h2>Headroom Analysis (Max Cost)</h2>
+                        <button class="btn btn-icon" id="downloadHeadroomBtnPlp" title="Export as PNG">Export</button>
+                    </div>
+                    <canvas id="headroomChartPlp"></canvas>
+                </div>
+
+                <div class="chart-container glass-panel half-width">
+                    <div class="chart-header">
+                        <h2>One-Way Sensitivity (Tornado)</h2>
+                        <button class="btn btn-icon" id="downloadTornadoBtnPlp" title="Export as PNG">Export</button>
+                    </div>
+                    <canvas id="tornadoChartPlp"></canvas>
+                </div>
+            </div>
+
+            <!-- Charts Row 2: CE Plane & Markov Diagram -->
+            <div class="charts-row">
+                <div class="chart-container glass-panel half-width">
+                    <div class="chart-header">
+                        <h2>Probabilistic CE Plane (Scatter)</h2>
+                        <button class="btn btn-icon" id="downloadCeBtnPlp" title="Export as PNG">Export</button>
+                    </div>
+                    <canvas id="cePlaneChartPlp"></canvas>
+                </div>
+
+                <div class="chart-container glass-panel half-width">
+                    <div class="chart-header">
+                        <h2>1-Year Markov Model Structure</h2>
+                    </div>
+                    <div class="mermaid" style="background:transparent; text-align:center; flex:1; display:flex; justify-content:center; align-items:center;">
+                        flowchart TB
+                            classDef default fill:transparent,stroke:#38bdf8,color:#f8fafc
+                            D[Discharge] -->|Baseline %| O[Opioids]
+                            D -->|Baseline %| NO[Non-Opioids]
+                            O --> PF[Pain-Free]
+                            O --> C[CPSP]
+                            O --> X[Death]
+                            NO --> PF
+                            NO --> C
+                            NO --> X
+                            PF --> X
+                            C --> X
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- WRAPPER 3: TABLE 1 -->
+    <main class="dashboard tab-content" id="tab-table" style="display:none; padding: 2rem 5%;">
+        <div class="glass-panel" style="width: 100%; max-width: 1000px; margin: 0 auto; padding: 2rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">
+                <h2 style="color: var(--text-primary); margin:0;">Table 1. Interactive Model Parameters Editor</h2>
+                <div class="currency-toggle" style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 0.25rem;">
+                    <button class="btn-preset active" id="btnEurGlobal" style="border:none; border-radius:4px; padding:0.25rem 0.5rem; background:transparent; color:var(--text-secondary); font-weight:bold; cursor:pointer;">EUR (€)</button>
+                    <button class="btn-preset" id="btnGbpGlobal" style="border:none; border-radius:4px; padding:0.25rem 0.5rem; background:var(--accent-primary); color:#fff; font-weight:bold; cursor:pointer;">GBP (£)</button>
+                </div>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table class="param-table edit-param-table" style="width:100%; border-collapse:collapse; margin-top:1rem;">
+                    <thead>
+                        <tr style="background: rgba(255,255,255,0.05); text-align: left;">
+                            <th style="padding: 10px;">Parameter</th>
+                            <th style="padding: 10px; width: 15%;">Month 1</th>
+                            <th style="padding: 10px; width: 15%;">Month 2</th>
+                            <th style="padding: 10px; width: 15%;">Month 3</th>
+                            <th style="padding: 10px; width: 15%;">Month 4–12</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Section 1: Probabilities -->
+                        <tr class="section-header" style="background: rgba(56, 189, 248, 0.1); font-weight: bold;"><td colspan="5" style="padding:8px; color: var(--accent-primary);">Probabilities (0–1)</td></tr>
+                        
+                        <tr>
+                            <td style="padding:8px;">"pain free" to "pain treated with non-opioids"</td>
+                            <td><input type="number" id="transPfNonOp_m1Global" value="0.1176" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transPfNonOp_m2Global" value="0.0000" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transPfNonOp_m3Global" value="0.0000" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transPfNonOp_m4_12Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">"pain treated with non-opioid" to "pain free"</td>
+                            <td><input type="number" id="transNonOpPF_m1Global" value="0.0000" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transNonOpPF_m2Global" value="1.0000" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transNonOpPF_m3Global" value="0.7297" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transNonOpPF_m4_12Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">"pain treated with non-opioid" to "pain treated with opioids"</td>
+                            <td><input type="number" id="transNonOpOp_m1Global" value="0.1299" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transNonOpOp_m2Global" value="0.0000" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transNonOpOp_m3Global" value="0.0000" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transNonOpOp_m4_12Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">"pain treated with opioids" to "pain free"</td>
+                            <td><input type="number" id="transOpioidPF_m1Global" value="0.0000" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transOpioidPF_m2Global" value="0.4841" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transOpioidPF_m3Global" value="0.0000" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transOpioidPF_m4_12Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">"pain treated with opioids" to "pain treated with non-opioids"</td>
+                            <td><input type="number" id="transOpioidNonOp_m1Global" value="0.0000" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transOpioidNonOp_m2Global" value="0.2937" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transOpioidNonOp_m3Global" value="0.4643" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transOpioidNonOp_m4_12Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">"pain treated with non-opioids" to "chronic pain"</td>
+                            <td><input type="number" id="transNonOpCpsp_m1Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transNonOpCpsp_m2Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transNonOpCpsp_m3Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transNonOpCpsp_m4_12Global" value="1.0000" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">"pain treated with opioids" to "chronic pain"</td>
+                            <td><input type="number" id="transOpioidCpsp_m1Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transOpioidCpsp_m2Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transOpioidCpsp_m3Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transOpioidCpsp_m4_12Global" value="1.0000" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">"chronic pain" to "pain free"</td>
+                            <td><input type="number" id="transCpspPF_m1Global" placeholder="n/a" value="" step="0.001" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transCpspPF_m2Global" placeholder="n/a" value="" step="0.001" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transCpspPF_m3Global" placeholder="n/a" value="" step="0.001" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="transCpspPF_m4_12Global" value="0.0286" step="0.001" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Risk from any state to "death"</td>
+                            <td><input type="number" id="deathRisk_m1Global" value="0.0005" step="0.0001" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="deathRisk_m2Global" value="0.0005" step="0.0001" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="deathRisk_m3Global" value="0.0005" step="0.0001" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="deathRisk_m4_12Global" value="0.0005" step="0.0001" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+
+                        <!-- Section 2: General Physician Visits -->
+                        <tr class="section-header" style="background: rgba(56, 189, 248, 0.1); font-weight: bold;"><td colspan="5" style="padding:8px; color: var(--accent-primary);">Number of general physician visits</td></tr>
+                        <tr>
+                            <td style="padding:8px;">Pain free</td>
+                            <td><input type="number" id="gpPF_m1Global" value="0.03" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="gpPF_m2Global" value="0.01" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="gpPF_m3Global" value="0.02" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="gpPF_m4_12Global" value="0.01" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Pain without opioids</td>
+                            <td><input type="number" id="gpNonOp_m1Global" value="0.11" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="gpNonOp_m2Global" value="0.14" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="gpNonOp_m3Global" value="0.30" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="gpNonOp_m4_12Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Pain with opioids</td>
+                            <td><input type="number" id="gpOp_m1Global" value="0.23" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="gpOp_m2Global" value="0.50" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="gpOp_m3Global" value="0.60" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="gpOp_m4_12Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Chronic pain</td>
+                            <td><input type="number" id="gpCpsp_m1Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="gpCpsp_m2Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="gpCpsp_m3Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="gpCpspGlobal" value="0.61" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+
+                        <!-- Section 2.5: Specialist Visits -->
+                        <tr class="section-header" style="background: rgba(56, 189, 248, 0.1); font-weight: bold;"><td colspan="5" style="padding:8px; color: var(--accent-primary);">Number of specialist visits</td></tr>
+                        <tr>
+                            <td style="padding:8px;">Pain without opioids</td>
+                            <td><input type="number" id="specNonOp_m1Global" value="0.10" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="specNonOp_m2Global" value="0.10" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="specNonOp_m3Global" value="0.10" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="specNonOp_m4_12Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Pain with opioids</td>
+                            <td><input type="number" id="specOp_m1Global" value="0.20" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="specOp_m2Global" value="0.20" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="specOp_m3Global" value="0.20" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="specOp_m4_12Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Chronic pain state (CPSP)</td>
+                            <td><input type="number" id="specCpsp_m1Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="specCpsp_m2Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="specCpsp_m3Global" placeholder="n/a" value="" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                            <td><input type="number" id="specCpspGlobal" value="0.30" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+
+                        <!-- Section 3: VR cost -->
+                        <tr class="section-header" style="background: rgba(56, 189, 248, 0.1); font-weight: bold;"><td colspan="5" style="padding:8px; color: var(--accent-primary);">VR cost (€), base-case</td></tr>
+                        <tr>
+                            <td style="padding:8px;">VR cost (€)</td>
+                            <td colspan="4"><input type="number" id="vrCostGlobal" value="40.55" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+
+                        <!-- Section 4: Medical costs -->
+                        <tr class="section-header" style="background: rgba(56, 189, 248, 0.1); font-weight: bold;"><td colspan="5" style="padding:8px; color: var(--accent-primary);">Medical costs (€)</td></tr>
+                        <tr>
+                            <td style="padding:8px;">Oxynorm, 5 mg (fast-acting opioid)</td>
+                            <td colspan="4"><input type="number" id="drugCostOpioidDecreaseGlobal" value="0.24" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Oxycontin long-acting, 10 mg (stable opioid)</td>
+                            <td colspan="4"><input type="number" id="drugCostOpioidStableGlobal" value="0.35" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Acetaminophen, 500 mg (paracetamol)</td>
+                            <td colspan="4"><input type="number" id="drugCostParacetamolGlobal" value="0.03" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">GP visit</td>
+                            <td colspan="4"><input type="number" id="costGPGlobal" value="32.04" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Specialist visit, pain health states</td>
+                            <td colspan="4"><input type="number" id="costSpecialistGlobal" value="225.00" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Specialist visit, chronic pain state</td>
+                            <td colspan="4"><input type="number" id="costChronicCareGlobal" value="119.51" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+
+                        <!-- Section 5: Non-medical costs -->
+                        <tr class="section-header" style="background: rgba(56, 189, 248, 0.1); font-weight: bold;"><td colspan="5" style="padding:8px; color: var(--accent-primary);">Non-medical costs (€)</td></tr>
+                        <tr>
+                            <td style="padding:8px;">Travel costs (per km)</td>
+                            <td colspan="4"><input type="number" id="travelCostKmGlobal" value="0.26" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Average distance to hospital (one-way, km)</td>
+                            <td colspan="4"><input type="number" id="travelDistanceGlobal" value="7.1" step="0.1" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Parking costs</td>
+                            <td colspan="4"><input type="number" id="parkingCostGlobal" value="3.92" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Caregiver cost per hour</td>
+                            <td colspan="4"><input type="number" id="costCaregiverGlobal" value="19.51" step="0.01" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+
+                        <!-- Section 6: Caregiver time, per months -->
+                        <tr class="section-header" style="background: rgba(56, 189, 248, 0.1); font-weight: bold;"><td colspan="5" style="padding:8px; color: var(--accent-primary);">Caregiver time, per months</td></tr>
+                        <tr>
+                            <td style="padding:8px;">Pain without opioids</td>
+                            <td colspan="4"><input type="number" id="informalCareNonOpioidGlobal" value="8" step="1" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Pain with opioids</td>
+                            <td colspan="4"><input type="number" id="informalCareOpioidGlobal" value="20" step="1" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Chronic pain</td>
+                            <td colspan="4"><input type="number" id="informalCareCPSPGlobal" value="20" step="1" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+
+                        <!-- Section 7: Utilities -->
+                        <tr class="section-header" style="background: rgba(56, 189, 248, 0.1); font-weight: bold;"><td colspan="5" style="padding:8px; color: var(--accent-primary);">Utilities</td></tr>
+                        <tr>
+                            <td style="padding:8px;">Pain free</td>
+                            <td colspan="4"><input type="number" id="utilPfGlobal" value="1.0" step="0.05" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Pain with no opioids</td>
+                            <td colspan="4"><input type="number" id="utilNonOpGlobal" value="0.93" step="0.05" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Pain with opioids</td>
+                            <td colspan="4"><input type="number" id="utilOpioidGlobal" value="0.61" step="0.05" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Chronic pain</td>
+                            <td colspan="4"><input type="number" id="utilCpspGlobal" value="0.59" step="0.05" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+
+                        <!-- Section 8: Other Global Settings -->
+                        <tr class="section-header" style="background: rgba(56, 189, 248, 0.1); font-weight: bold;"><td colspan="5" style="padding:8px; color: var(--accent-primary);">Other Settings</td></tr>
+                        <tr>
+                            <td style="padding:8px;">Willingness to Pay (WTP, £)</td>
+                            <td colspan="4"><input type="number" id="wtpGlobal" value="20000" step="1000" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">CPSP Risk at 1 month (%)</td>
+                            <td colspan="4"><input type="number" id="cpspRiskGlobal" value="15" step="1" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">VR Opioid reduction efficacy (%)</td>
+                            <td colspan="4"><input type="number" id="opioidReductionGlobal" value="2.8" step="0.1" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Population Age</td>
+                            <td colspan="4"><input type="number" id="popAgeGlobal" value="65" step="1" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">Percentage Male (0.0 to 1.0)</td>
+                            <td colspan="4"><input type="number" id="pctMaleGlobal" value="0.50" step="0.05" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:4px; border-radius:4px;"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap: 1rem; margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                <button id="btnResetGlobal" class="btn btn-secondary">Reset Global to Baseline</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- WRAPPER 4.5: UK HTA & REGULATORY COMPLIANCE -->
+    <main class="dashboard tab-content" id="tab-hta" style="display:none;">
+        <aside class="glass-panel inputs">
+            <h2>NICE & NHS Pathways</h2>
+            <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:1.5rem; line-height:1.4;">
+                Select clinical and software attributes to evaluate compliance with NHS England HTA guidelines and MHRA regulations.
+            </p>
+
+            <div class="input-group">
+                <label for="htaClinicalContext">Rehabilitation Context (NG211)</label>
+                <select id="htaClinicalContext" class="sync-input" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:6px; border-radius:6px; font-size:0.9rem;">
+                    <option value="ortho">Post-surgical Trauma / Orthopedic Rehab</option>
+                    <option value="neuro">Neuropathic / Phantom Limb Pain</option>
+                    <option value="trauma">Complex Major Trauma Rehabilitation</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="htaSamdDeviceClass">MHRA SaMD Intended Use</label>
+                <select id="htaSamdDeviceClass" class="sync-input" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:6px; border-radius:6px; font-size:0.9rem;">
+                    <option value="treatment">Therapy / Direct treatment of pain (Class IIa/IIb)</option>
+                    <option value="monitoring">Passive monitoring / Symptom diary (Class I)</option>
+                    <option value="critical">Critical intervention recommendation (Class III)</option>
+                </select>
+            </div>
+
+            <div style="margin-top:1.5rem; border-top:1px solid rgba(255,255,255,0.1); padding-top:1rem;">
+                <h3 style="font-size:0.9rem; color:var(--text-primary); margin-bottom:0.75rem;">NHS DTAC Pre-requisites</h3>
+                <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.8rem; color:var(--text-secondary);">
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;"><input type="checkbox" id="dtacSafety" checked> Clinical Safety (DCB0129 Compliance)</label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;"><input type="checkbox" id="dtacCyber" checked> Cyber Essentials Plus certified</label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;"><input type="checkbox" id="dtacGdpr" checked> GDPR & DSPT compliant</label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;"><input type="checkbox" id="dtacInterop"> NHS Interoperability standards (FHIR API)</label>
+                </div>
+            </div>
+        </aside>
+
+        <section class="results">
+            <div class="results-header" style="justify-content: space-between;">
+                <h2>NICE & Regulatory Assessment Report</h2>
+                <div class="status-badge" id="htaOverallStatus" style="font-weight: bold; border: 1px solid var(--accent-primary); background: rgba(56, 189, 248, 0.1); color: var(--accent-primary);">EVALUATING</div>
+            </div>
+
+            <div class="grid-2" style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
+                <!-- Left panel: NICE Outcomes -->
+                <div class="glass-panel" style="padding:1.5rem;">
+                    <h3 style="color:var(--accent-primary); margin-top:0;">NICE HTA & Economics Assessment</h3>
+                    <div style="display:flex; flex-direction:column; gap:1rem;">
+                        <div>
+                            <h4 style="margin:0; font-size:0.85rem; color:var(--text-primary);">NICE HTE Standard Pathway (ICER Thresholds)</h4>
+                            <p style="font-size:0.8rem; color:var(--text-secondary); margin:0.25rem 0;" id="htaHteResult">Evaluating...</p>
+                            <div style="width:100%; height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden; position:relative; margin-top:0.5rem;">
+                                <div id="htaThresholdBar" style="height:100%; width:0%; background:var(--success); border-radius:4px; transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 style="margin:0; font-size:0.85rem; color:var(--text-primary);">NICE Evidence Standards Framework (ESF)</h4>
+                            <p style="font-size:0.8rem; color:var(--text-secondary); margin:0.25rem 0;" id="htaEsfResult">Evaluating...</p>
+                        </div>
+
+                        <div>
+                            <h4 style="margin:0; font-size:0.85rem; color:var(--text-primary);">NICE Early Value Assessment (NICE EVA)</h4>
+                            <p style="font-size:0.8rem; color:var(--text-secondary); margin:0.25rem 0;" id="htaEvaResult">Evaluating...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right panel: MHRA & NHS Standards -->
+                <div class="glass-panel" style="padding:1.5rem;">
+                    <h3 style="color:#a855f7; margin-top:0;">MHRA Regulation & NHS DTAC</h3>
+                    <div style="display:flex; flex-direction:column; gap:1rem;">
+                        <div>
+                            <h4 style="margin:0; font-size:0.85rem; color:var(--text-primary);">MHRA Software as a Medical Device (SaMD)</h4>
+                            <p style="font-size:0.8rem; color:var(--text-secondary); margin:0.25rem 0;" id="htaMhraResult">Evaluating...</p>
+                        </div>
+
+                        <div>
+                            <h4 style="margin:0; font-size:0.85rem; color:var(--text-primary);">NHS Digital Technology Assessment Criteria (DTAC)</h4>
+                            <p style="font-size:0.8rem; color:var(--text-secondary); margin:0.25rem 0;" id="htaDtacResult">Evaluating...</p>
+                        </div>
+
+                        <div>
+                            <h4 style="margin:0; font-size:0.85rem; color:var(--text-primary);">Clinical Guideline NG211 Compliance</h4>
+                            <p style="font-size:0.8rem; color:var(--text-secondary); margin:0.25rem 0;" id="htaNg211Result">Evaluating...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Report Summary -->
+            <div class="glass-panel" style="padding:1.5rem;">
+                <h3 style="margin-top:0;">UK Market Access Executive Summary</h3>
+                <div id="htaSummaryReport" style="font-size:0.9rem; line-height:1.5; color:var(--text-secondary);">
+                    Loading report...
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- WRAPPER 4.8: METHODOLOGY & EQUATIONS -->
+    <main class="tab-content" id="tab-equations" style="display:none; padding: 2rem 5%; max-width: 1300px; margin: 0 auto;">
+        <div style="text-align:center; margin-bottom:2.5rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:1.5rem;">
+            <h1 style="color:var(--text-primary); margin-bottom:0.5rem; font-weight:700; font-size:2.2rem;">🔬 Model Specification &amp; Computational Framework</h1>
+            <p style="color:var(--text-secondary); font-size:1rem; margin:0;">Methodological foundations, LaTeX equations, and algorithmic specifications of the Markov cohort simulation</p>
+        </div>
+
+        <div class="methodology-grid" style="display:grid; grid-template-columns: 1.05fr 0.95fr; gap:2.5rem; align-items: start;">
+            <!-- Left Column: LaTeX Equations -->
+            <div style="display:flex; flex-direction:column; gap:2rem;">
+                
+                <!-- Section 1: Transitions -->
+                <div class="glass-panel" style="padding:2rem;">
+                    <h3 style="color:var(--accent-primary); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:0.5rem; margin-top:0; font-size:1.15rem; font-weight:600;">1. Markov Cohort State transitions</h3>
+                    <p style="font-size:0.9rem; line-height:1.6; margin-bottom:1.25rem;">The cohort is modeled monthly across 5 mutually exclusive health states. The state distribution vector is defined as:</p>
+                    
+                    <div class="latex-math-block">\mathbf{S}_t = [S_{t,\text{PF}}, S_{t,\text{NonOp}}, S_{t,\text{Opioid}}, S_{t,\text{CPSP}}, S_{t,\text{Death}}]</div>
+                    
+                    <p style="font-size:0.9rem; line-height:1.6; margin:1.25rem 0;">State occupancy at month <span class="latex-math">t+1</span> is calculated via matrix multiplication with transition matrix <span class="latex-math">\mathbf{P}</span>:</p>
+                    
+                    <div class="latex-math-block">\mathbf{S}_{t+1} = \mathbf{S}_t \times \mathbf{P}</div>
+                    
+                    <p style="font-size:0.9rem; line-height:1.6; margin:1.25rem 0;">The transition probability matrix is structured as follows:</p>
+                    <div class="latex-math-block">
+                    \mathbf{P} = \begin{pmatrix} 
+                    p_{\text{PF}\to\text{PF}} & p_{\text{PF}\to\text{NonOp}} & 0 & 0 & p_{\text{PF}\to\text{Death}} \\
+                    p_{\text{NonOp}\to\text{PF}} & p_{\text{NonOp}\to\text{NonOp}} & p_{\text{NonOp}\to\text{Opioid}} & p_{\text{NonOp}\to\text{CPSP}} & p_{\text{NonOp}\to\text{Death}} \\
+                    p_{\text{Opioid}\to\text{PF}} & p_{\text{Opioid}\to\text{NonOp}} & p_{\text{Opioid}\to\text{Opioid}} & p_{\text{Opioid}\to\text{CPSP}} & p_{\text{Opioid}\to\text{Death}} \\
+                    p_{\text{CPSP}\to\text{PF}} & 0 & 0 & p_{\text{CPSP}\to\text{CPSP}} & p_{\text{CPSP}\to\text{Death}} \\
+                    0 & 0 & 0 & 0 & 1.0 
+                    \end{pmatrix}
+                    </div>
+                    
+                    <p style="font-size:0.9rem; line-height:1.6; margin-top:1.25rem;">Opioid reduction efficacy (<span class="latex-math">\theta_{\text{VR}}</span>) reduces the baseline risk of developing chronic pain (<span class="latex-math">R_{\text{CPSP}}</span>) for patients transitioning from the opioid state:</p>
+                    
+                    <div class="latex-math-block">p(\text{Opioid} \to \text{CPSP})_{\text{VR}} = R_{\text{CPSP}} \times (1 - \theta_{\text{VR}})</div>
+                </div>
+
+                <!-- Section 2: Intervention Cost & QALYs -->
+                <div class="glass-panel" style="padding:2rem;">
+                    <h3 style="color:var(--accent-primary); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:0.5rem; margin-top:0; font-size:1.15rem; font-weight:600;">2. Amortized Costs &amp; QALY Weighting</h3>
+                    <p style="font-size:0.9rem; line-height:1.6; margin-bottom:1.25rem;">The total cost of the VR therapy intervention per patient (<span class="latex-math">C_{\text{VR}}</span>) is amortized over the lifetime patient capacity of the system (<span class="latex-math">N_{\text{Patients}}</span>) and incorporates session cost overhead:</p>
+                    
+                    <div class="latex-math-block">C_{\text{VR}} = C_{\text{Base}} + \frac{C_{\text{Capital}}}{N_{\text{Patients}}} + ( C_{\text{Session}} \times N_{\text{Sessions}} )</div>
+                    
+                    <p style="font-size:0.9rem; line-height:1.6; margin:1.25rem 0;">Quality-Adjusted Life Years (<span class="latex-math">\text{QALYs}</span>) are computed by summing the time spent in each health state multiplied by the state utility weights (<span class="latex-math">u_s</span>), adjusted by a monthly fractional factor and discount rate (<span class="latex-math">r</span>):</p>
+                    
+                    <div class="latex-math-block">\text{QALYs} = \sum_{t=1}^{12} \left( \sum_{s \in \mathcal{S}} S_t(s) \times u_s \right) \times \frac{1}{12} \times \frac{1}{(1 + r)^{t/12}}</div>
+                </div>
+
+                <!-- Section 3: Cost-Effectiveness Decision Metrics -->
+                <div class="glass-panel" style="padding:2rem;">
+                    <h3 style="color:var(--accent-primary); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:0.5rem; margin-top:0; font-size:1.15rem; font-weight:600;">3. Cost-Effectiveness Decision Metrics</h3>
+                    <p style="font-size:0.9rem; line-height:1.6; margin-bottom:1.25rem;">The Incremental Cost-Effectiveness Ratio (ICER) represents the additional cost per QALY gained by adopting VR therapy compared to Standard Care:</p>
+                    
+                    <div class="latex-math-block">\text{ICER} = \frac{\Delta C}{\Delta E} = \frac{C_{\text{VR}} - C_{\text{SC}}}{E_{\text{VR}} - E_{\text{SC}}}</div>
+                    
+                    <p style="font-size:0.9rem; line-height:1.6; margin:1.25rem 0;">The Net Monetary Benefit (NMB) converts QALY gains into currency terms using the Willingness to Pay threshold (<span class="latex-math">\lambda</span>):</p>
+                    
+                    <div class="latex-math-block">\text{NMB} = (\lambda \times \Delta E) - \Delta C</div>
+                    
+                </div>
+
+                <!-- Section 4: Societal Impact Scaling -->
+                <div class="glass-panel" style="padding:2rem;">
+                    <h3 style="color:var(--accent-primary); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:0.5rem; margin-top:0; font-size:1.15rem; font-weight:600;">4. Societal &amp; Productivity Scaling Projections</h3>
+                    <p style="font-size:0.9rem; line-height:1.6; margin-bottom:1.25rem;">Direct health system savings are scaled up to a regional cohort of size <span class="latex-math">N_{\text{Cohort}}</span>:</p>
+                    
+                    <div class="latex-math-block">S_{\text{Health}} = (C_{\text{SC}} - C_{\text{VR}}) \times N_{\text{Cohort}}</div>
+                    
+                    <p style="font-size:0.9rem; line-height:1.6; margin:1.25rem 0;">Productivity losses from workplace absenteeism are modeled based on state occupancy weights <span class="latex-math">A_s \in \{0.20, 0.50, 0.80\}</span> for states <span class="latex-math">s \in \{\text{NonOp}, \text{Opioid}, \text{CPSP}\}</span>. The annual weeks of absenteeism saved is computed as:</p>
+                    
+                    <div class="latex-math-block">\Delta W_{\text{Abs}} = \sum_{t=1}^{12} \left[ \sum_{s \in \mathcal{S}} (S_{t,\text{SC}}(s) - S_{t,\text{VR}}(s)) \times A_s \right] \times 4.33 \times N_{\text{Cohort}} \times R_{\text{Emp}}</div>
+                    
+                    <p style="font-size:0.9rem; line-height:1.6; margin:1.25rem 0;">Workplace productivity economic savings are then calculated based on average weekly earnings <span class="latex-math">W_{\text{Earn}}</span>:</p>
+                    
+                    <div class="latex-math-block">\text{Savings}_{\text{Productivity}} = \Delta W_{\text{Abs}} \times W_{\text{Earn}}</div>
+                    
+                    <p style="font-size:0.9rem; line-height:1.6; margin-top:1.25rem;">Informal caregiver hours saved are computed using care overhead coefficients <span class="latex-math">H_s \in \{8, 20, 20\}</span> hours/month:</p>
+                    
+                    <div class="latex-math-block">\Delta H_{\text{Caregiver}} = \sum_{t=1}^{12} \left[ \sum_{s \in \mathcal{S}} (S_{t,\text{SC}}(s) - S_{t,\text{VR}}(s)) \times H_s \right] \times N_{\text{Cohort}}</div>
+                </div>
+            </div>
+
+            <!-- Right Column: Algorithmic Specifications -->
+            <div style="display:flex; flex-direction:column; gap:2rem;">
+                
+                <div class="glass-panel" style="padding:2rem;">
+                    <h3 style="color:#a855f7; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:0.5rem; margin-top:0; font-size:1.15rem; font-weight:600;">5. Computational Execution Algorithms</h3>
+                    <p style="font-size:0.9rem; line-height:1.6; margin-bottom:1.5rem;">Below are the pseudocode specifications for the core Markov iteration loop, stochastic sensitivity modeling, and numerical root-finding algorithms.</p>
+                    
+                    <!-- Alg 1 Panel -->
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:1.25rem; margin-bottom:1.5rem;">
+                        <h4 style="color:#c084fc; margin-top:0; margin-bottom:0.5rem; font-size:0.85rem; text-transform:uppercase; font-weight:700;">Algorithm 1: Markov Cohort Simulation Loop</h4>
+                        <pre style="font-family:'Courier New', monospace; font-size:0.75rem; margin:0; line-height:1.4; color:#d8b4fe; overflow-x:auto;">
+<b>Input</b>: Parameter profile &#920;, Time Horizon T = 12 months, Initial Vector S<sub>0</sub>
+<b>Output</b>: Cumulative QALYs E, Cumulative Healthcare Costs C
+
+1: Initialize state occupancy: S<sub>0</sub> &larr; [0.0, 0.3, 0.7, 0.0, 0.0]
+2: Apply efficacy adjustments: P(Opioid &rarr; CPSP) &larr; Risk &times; (1 - Efficacy)
+3: Initialize accumulators: E &larr; 0, C &larr; 0
+4: <b>For</b> month t = 0 <b>to</b> T-1:
+5:     Compute transition matrix multiplication: S<sub>t+1</sub> &larr; S<sub>t</sub> &times; P
+6:     Calculate QALY increment: E &larr; E + &Sigma;<sub>s</sub> S<sub>t+1</sub>(s) &times; u<sub>s</sub> &times; (1/12)
+7:     Calculate healthcare cost: C &larr; C + &Sigma;<sub>s</sub> S<sub>t+1</sub>(s) &times; Cost<sub>s</sub> &times; (1/12)
+8: <b>End For</b>
+9: Add intervention acquisition cost to VR Arm cost: C &larr; C + C<sub>VR</sub>
+10: <b>Return</b> E, C
+                        </pre>
+                    </div>
+
+                    <!-- Alg 2 Panel -->
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:1.25rem; margin-bottom:1.5rem;">
+                        <h4 style="color:#c084fc; margin-top:0; margin-bottom:0.5rem; font-size:0.85rem; text-transform:uppercase; font-weight:700;">Algorithm 2: Probabilistic Sensitivity Analysis (PSA)</h4>
+                        <pre style="font-family:'Courier New', monospace; font-size:0.75rem; margin:0; line-height:1.4; color:#d8b4fe; overflow-x:auto;">
+<b>Input</b>: Model parameters baseline &#920;, Monte Carlo Iterations N = 200
+<b>Output</b>: Scatter plot points { (&#916;E<sub>i</sub>, &#916;C<sub>i</sub>) } for i = 1 to N
+
+1: <b>For</b> iteration i = 1 <b>to</b> N:
+2:     Sample utilities: u<sub>s,i</sub> &larr; BetaDistribution(mean = u<sub>s</sub>, SD = 0.1 &times; u<sub>s</sub>)
+3:     Sample unit costs: Cost<sub>s,i</sub> &larr; GammaDistribution(mean = Cost<sub>s</sub>, SD = 0.2 &times; Cost<sub>s</sub>)
+4:     Construct stochastic parameters &#920;<sub>i</sub>
+5:     Run Algorithm 1 on Standard Care: (E<sub>SC,i</sub>, C<sub>SC,i</sub>) &larr; Simulate(Standard, &#920;<sub>i</sub>)
+6:     Run Algorithm 1 on VR Therapy:   (E<sub>VR,i</sub>, C<sub>VR,i</sub>) &larr; Simulate(VR, &#920;<sub>i</sub>)
+7:     Compute differences: &#916;E<sub>i</sub> &larr; E<sub>VR,i</sub> - E<sub>SC,i</sub>,   &#916;C<sub>i</sub> &larr; C<sub>VR,i</sub> - C<sub>SC,i</sub>
+8:     Save scatter point: PlotData.push( (&#916;E<sub>i</sub>, &#916;C<sub>i</sub>) )
+9: <b>End For</b>
+10: <b>Return</b> PlotData
+                        </pre>
+                    </div>
+
+                    <!-- Alg 3 Panel -->
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:1.25rem;">
+                        <h4 style="color:#c084fc; margin-top:0; margin-bottom:0.5rem; font-size:0.85rem; text-transform:uppercase; font-weight:700;">Algorithm 3: One-Dimensional Threshold Solver</h4>
+                        <pre style="font-family:'Courier New', monospace; font-size:0.75rem; margin:0; line-height:1.4; color:#d8b4fe; overflow-x:auto;">
+<b>Input</b>: Objective function f(x) = NMB(x) - NMB<sub>target</sub>, search bounds [a, b], tolerance &epsilon; = 0.0001
+<b>Output</b>: Root threshold value x<sup>*</sup> (where Net Monetary Benefit = 0)
+
+1: Initialize bounds: x<sub>0</sub> &larr; a, x<sub>1</sub> &larr; b
+2: Calculate objective values: y<sub>0</sub> &larr; f(x<sub>0</sub>), y<sub>1</sub> &larr; f(x<sub>1</sub>)
+3: <b>While</b> |x<sub>1</sub> - x<sub>0</sub>| &gt; &epsilon;:
+4:     Calculate secant step: x<sub>next</sub> &larr; x<sub>1</sub> - y<sub>1</sub> &times; (x<sub>1</sub> - x<sub>0</sub>) / (y<sub>1</sub> - y<sub>0</sub>)
+5:     Bound next step to search constraints: x<sub>next</sub> &larr; Clamp(x<sub>next</sub>, a, b)
+6:     Update states: x<sub>0</sub> &larr; x<sub>1</sub>,  x<sub>1</sub> &larr; x<sub>next</sub>
+7:     Evaluate target: y<sub>0</sub> &larr; y<sub>1</sub>,  y<sub>1</sub> &larr; f(x<sub>1</sub>)
+8:     <b>If</b> |y<sub>1</sub>| &lt; tolerance: <b>Break</b>
+9: <b>End While</b>
+10: <b>Return</b> x<sub>1</sub>
+                        </pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>    <!-- Custom Modal for Thresholds -->
+    <div id="thresholdsModal" class="modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.65); backdrop-filter:blur(5px); align-items:center; justify-content:center;">
+        <div class="glass-panel" style="max-width:450px; width:90%; padding:2rem; border-radius:12px; border:1px solid rgba(255,255,255,0.1); position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+            <span id="closeModal" style="position:absolute; right:1.25rem; top:0.75rem; font-size:1.5rem; cursor:pointer; color:var(--text-secondary); font-weight:bold;">&times;</span>
+            <h2 style="color:var(--accent-primary); margin-top:0; margin-bottom:1rem; text-align:center; font-size:1.4rem;">Efficacy Threshold Finder</h2>
+            <p style="font-size:0.85rem; margin-bottom:1.5rem; line-height:1.4; text-align:center; color:var(--text-secondary);">
+                Minimum VR Opioid reduction efficacy required at discharge to meet clinical economics targets based on your active parameters:
+            </p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
+                <div class="kpi-card glass-panel" style="text-align:center; padding:1rem; background:rgba(0,0,0,0.2);">
+                    <h3 id="modalCeTitle" style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.5rem; margin-top:0;">Cost-Effective</h3>
+                    <div id="modalCeThreshold" style="font-size:1.4rem; font-weight:bold; color:var(--accent-primary);">Calculating...</div>
+                    <button id="btnApplyCeThreshold" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.5rem; margin-top:0.75rem; width:100%; cursor:pointer;">Apply Efficacy</button>
+                </div>
+                <div class="kpi-card glass-panel" style="text-align:center; padding:1rem; background:rgba(0,0,0,0.2);">
+                    <h3 style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.5rem; margin-top:0;">Cost-Saving</h3>
+                    <div id="modalCsThreshold" style="font-size:1.4rem; font-weight:bold; color:var(--success);">Calculating...</div>
+                    <button id="btnApplyCsThreshold" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.5rem; margin-top:0.75rem; width:100%; cursor:pointer;">Apply Efficacy</button>
+                </div>
+            </div>
+            <p id="modalContextNote" style="font-size:0.75rem; color:var(--text-secondary); text-align:center; margin:0; line-height:1.3;"></p>
+        </div>
+    </div>
+    <!-- WRAPPER 4: SOCIETAL IMPACT ANALYSIS -->
+    <main class="dashboard tab-content" id="tab-societal" style="display:none;">
+        <!-- Left Panel: Scaling Parameters -->
+        <aside class="glass-panel inputs">
+            <h2>Societal & Cohort Settings</h2>
+            <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:1.5rem; line-height:1.4;">
+                Adjust demographic and workforce parameters to scale the results of the <strong>VR + Robotics Sandbox</strong> across the population.
+            </p>
+
+            <div class="input-group">
+                <label for="cohortSizeSocietal">Annual Patient Cohort Size</label>
+                <div class="slider-container">
+                    <input type="number" id="cohortSizeSocietalNum" min="100" max="50000" value="10000" step="100" class="sync-input">
+                    <input type="range" id="cohortSizeSocietal" min="100" max="50000" value="10000" step="100">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="weeklyEarningsSocietal">Avg. Weekly Earning Rate (£/€)</label>
+                <div class="slider-container">
+                    <input type="number" id="weeklyEarningsSocietalNum" min="100" max="25000" value="650" step="10" class="sync-input">
+                    <input type="range" id="weeklyEarningsSocietal" min="100" max="2000" value="650" step="10">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="employmentRateSocietal">Employment Rate of Cohort (%)</label>
+                <div class="slider-container">
+                    <input type="number" id="employmentRateSocietalNum" min="0" max="100" value="60" step="1" class="sync-input">
+                    <input type="range" id="employmentRateSocietal" min="0" max="100" value="60" step="1">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="horizonSocietal">Societal Forecast Horizon (Years)</label>
+                <div class="slider-container">
+                    <input type="number" id="horizonSocietalNum" min="1" max="10" value="5" step="1" class="sync-input">
+                    <input type="range" id="horizonSocietal" min="1" max="10" value="5" step="1">
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right Panel: Impact Results -->
+        <section class="results">
+            <div class="results-header" style="justify-content: space-between;">
+                <h2>Societal & Healthcare Forecast Results</h2>
+                <div class="status-badge" id="societalRoiStatus" style="font-weight: bold; border: 1px solid var(--accent-primary); background: rgba(56, 189, 248, 0.1); color: var(--accent-primary);">HEALTHCARE PAYBACK</div>
+            </div>
+
+            <!-- Core KPIs -->
+            <div class="kpis" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="kpi-card" style="border-left: 4px solid var(--accent-primary);">
+                    <h3>Annual Healthcare Savings</h3>
+                    <div class="value" id="kpiSocHealthSavings">£0</div>
+                    <p>Direct medical & care costs saved</p>
+                </div>
+                <div class="kpi-card" style="border-left: 4px solid var(--success);">
+                    <h3>Productivity Restored</h3>
+                    <div class="value" id="kpiSocProdSavings">£0</div>
+                    <p>Earnings restored to patient cohort</p>
+                </div>
+                <div class="kpi-card" style="border-left: 4px solid #a855f7;">
+                    <h3>Total Net Societal Value</h3>
+                    <div class="value" id="kpiSocNetValue">£0</div>
+                    <p>Total economic & utility impact</p>
+                </div>
+                <div class="kpi-card" style="border-left: 4px solid #eab308;">
+                    <h3>Cohort QALYs Gained</h3>
+                    <div class="value" id="kpiSocQalyGained">0.00</div>
+                    <p>Total health utility gained</p>
+                </div>
+            </div>
+
+            <!-- Charts and Forecast Grid -->
+            <div class="grid-2" style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
+                <!-- ROI Timeline Chart -->
+                <div class="glass-panel" style="padding:1.5rem; min-height: 350px;">
+                    <h3>Cumulative Cost Savings Profile</h3>
+                    <canvas id="societalRoiChart" style="max-height: 280px; width: 100%;"></canvas>
+                </div>
+
+                <!-- Detailed Breakdown Tables -->
+                <div class="glass-panel" style="padding:1.5rem;">
+                    <h3>Cohort Impact Breakdown</h3>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <h4 style="color:var(--accent-primary); margin-top:0; margin-bottom:0.5rem; font-size:0.9rem;">🏥 Medical Resource Reductions (Annual)</h4>
+                        <table style="width:100%; font-size:0.85rem; line-height:1.6; border-collapse:collapse;">
+                            <tbody>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td>CPSP (Chronic Pain) cases prevented</td><td id="socCpspPrevented" style="text-align:right; font-weight:bold; color:var(--success);">0 cases</td></tr>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td>General Practitioner (GP) visits avoided</td><td id="socGpAvoided" style="text-align:right; font-weight:bold;">0 visits</td></tr>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td>Specialist consultation visits avoided</td><td id="socSpecAvoided" style="text-align:right; font-weight:bold;">0 visits</td></tr>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td>Opioid therapy prescription months avoided</td><td id="socOpioidMonthsSaved" style="text-align:right; font-weight:bold;">0 months</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div>
+                        <h4 style="color:#a855f7; margin-top:0; margin-bottom:0.5rem; font-size:0.9rem;">👔 Productivity & Informal Caregiver Impacts</h4>
+                        <table style="width:100%; font-size:0.85rem; line-height:1.6; border-collapse:collapse;">
+                            <tbody>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td>Workplace absenteeism weeks avoided</td><td id="socAbsenteeismSaved" style="text-align:right; font-weight:bold; color:var(--success);">0 weeks</td></tr>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td>Total informal caregiver hours saved</td><td id="socCaregiverHoursSaved" style="text-align:right; font-weight:bold;">0 hours</td></tr>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td>Total caregiver cost offset saved</td><td id="socCaregiverCostSaved" style="text-align:right; font-weight:bold;">£0</td></tr>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td>Per-patient lifetime savings (5-Yr)</td><td id="socPerPatientSavings" style="text-align:right; font-weight:bold; color:var(--success);">£0</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/model.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- System Capital Budget Modal -->
+    <div class="modal" id="systemBudgetModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; justify-content:center; align-items:center; backdrop-filter:blur(4px);">
+        <div class="glass-panel" style="width:90%; max-width:550px; padding:2rem; position:relative; box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);">
+            <button id="closeBudgetModalBtn" style="position:absolute; top:1rem; right:1rem; background:transparent; border:none; color:var(--text-secondary); font-size:1.5rem; cursor:pointer;">&times;</button>
+            <h2 style="color:var(--text-primary); margin-top:0; margin-bottom:1rem; text-align:center;">📊 System Capital Budget Solver</h2>
+            
+            <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1.5rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:1rem; line-height:1.4;">
+                This solver calculates the <strong>maximum capital acquisition cost per system</strong> for the clinical trial attributes currently configured on the PLP tab.
+            </div>
+
+            <!-- Budget Ranges Cards -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:1.5rem;">
+                <div class="glass-panel" style="padding:1rem; border:1px solid rgba(56, 189, 248, 0.3); background:rgba(56, 189, 248, 0.05);">
+                    <h3 style="color:var(--accent-primary); margin-top:0; font-size:0.95rem; text-align:center;">Cost-Effective Budget</h3>
+                    <div style="font-size:1.3rem; font-weight:bold; text-align:center; margin:0.5rem 0;" id="budgetCeRange">£0</div>
+                    <p style="font-size:0.75rem; color:var(--text-secondary); margin:0; text-align:center; line-height:1.3;" id="budgetCePerPatient">Up to £0 / patient</p>
+                </div>
+                <div class="glass-panel" style="padding:1rem; border:1px solid rgba(16, 185, 129, 0.3); background:rgba(16, 185, 129, 0.05);">
+                    <h3 style="color:var(--success); margin-top:0; font-size:0.95rem; text-align:center;">Cost-Saving Budget</h3>
+                    <div style="font-size:1.3rem; font-weight:bold; text-align:center; margin:0.5rem 0;" id="budgetCsRange">£0</div>
+                    <p style="font-size:0.75rem; color:var(--text-secondary); margin:0; text-align:center; line-height:1.3;" id="budgetCsPerPatient">Up to £0 / patient</p>
+                </div>
+            </div>
+
+            <!-- Maximum Combined Sales Price Card -->
+            <div class="glass-panel" style="padding:1rem; border:1px solid #a855f7; background:rgba(168, 85, 247, 0.08); margin-bottom:1.5rem; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <h3 style="color:#c084fc; margin-top:0; font-size:1rem; text-align:center; font-weight:bold;">💰 Maximum System Price (To meet BOTH criteria)</h3>
+                <div style="font-size:1.6rem; font-weight:bold; text-align:center; margin:0.5rem 0; color:#fff;" id="budgetCombinedRange">£0</div>
+                <p style="font-size:0.75rem; color:#cbd5e1; margin:0; text-align:center; line-height:1.3;" id="budgetCombinedPerPatient">Up to £0 / patient</p>
+            </div>
+
+            <!-- Scale assumption input -->
+            <div class="input-group" style="margin-bottom:1.5rem;">
+                <label for="budgetPatientsPerSystem" style="font-size:0.85rem;">Assumed Patients Treated per System (Lifetime)</label>
+                <input type="number" id="budgetPatientsPerSystem" value="100" min="1" style="width:100%; background:rgba(0,0,0,0.3); color:#fff; border:1px solid rgba(255,255,255,0.1); padding:8px; border-radius:6px;">
+            </div>
+
+            <div style="text-align:right;">
+                <button id="btnApplyBudgetLimit" class="btn-preset active" style="padding:0.5rem 1.5rem; font-weight:bold; border-radius:6px; border:none; cursor:pointer; background:var(--accent-primary); color:#fff;">Apply Max Budget</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
