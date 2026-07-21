@@ -1,1487 +1,1162 @@
-// app.js
+/**
+ * app.js – UI Controller for UCLTouchRehab PLP Health Economic Analysis
+ */
 
+/* ─── Tab Switching ─── */
+window.switchTabByName = function (name) {
+    const BTNS = {
+        model:'btnTabModel', structure:'btnTabStructure', table:'btnTabTable',
+        hta:'btnTabHta', societal:'btnTabSocietal', equations:'btnTabEquations',
+        results:'btnTabResults', adaptation:'btnTabAdaptation', walkthrough:'btnTabWalkthrough',
+        psa:'btnTabPSA'
+    };
+    const TABS = {
+        model:'tab-model', structure:'tab-structure', table:'tab-table',
+        hta:'tab-hta', societal:'tab-societal', equations:'tab-equations',
+        results:'tab-results', adaptation:'tab-adaptation', walkthrough:'tab-walkthrough',
+        psa:'tab-psa'
+    };
+
+    Object.values(BTNS).forEach(id => { const b = document.getElementById(id); if (b) b.classList.remove('active'); });
+    Object.values(TABS).forEach(id => {
+        const t = document.getElementById(id);
+        if (t) { t.classList.remove('active'); t.style.setProperty('display','none','important'); }
+    });
+
+    const btn = document.getElementById(BTNS[name]);
+    const tab = document.getElementById(TABS[name]);
+    if (btn) btn.classList.add('active');
+    if (tab) {
+        tab.classList.add('active');
+        const disp = tab.classList.contains('dashboard') ? 'grid' : 'block';
+        tab.style.setProperty('display', disp, 'important');
+    }
+
+    if (name === 'equations' && typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+        MathJax.typesetPromise();
+    }
+    if (name === 'societal') updateSocietalTab();
+    if (name === 'hta' && window._lastRes) updateHtaDisplay(window._lastRes, window._lastInputs);
+    if (name === 'psa' && typeof refreshPSAMeans === 'function') refreshPSAMeans();
+};
+
+/* ─── Chart instances ─── */
+const _charts = {};
+function destroyChart(id) {
+    if (_charts[id]) { try { _charts[id].destroy(); } catch(e){} delete _charts[id]; }
+}
+
+/* ─── Save chart as PNG ─── */
+window.saveChart = function (canvasId, filename) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    // Create a temp canvas with dark background (charts are transparent by default)
+    const tmp = document.createElement('canvas');
+    tmp.width  = canvas.width;
+    tmp.height = canvas.height;
+    const ctx  = tmp.getContext('2d');
+
+    // Fill dark background matching the app theme
+    ctx.fillStyle = '#0d1829';
+    ctx.fillRect(0, 0, tmp.width, tmp.height);
+
+    // Draw the chart on top
+    ctx.drawImage(canvas, 0, 0);
+
+    // Download
+    const link = document.createElement('a');
+    const ts   = new Date().toISOString().slice(0,10);
+    link.download = `UCLTouchRehab_${filename}_${ts}.png`;
+    link.href = tmp.toDataURL('image/png');
+    link.click();
+
+    // Flash button feedback
+    const btn = document.querySelector(`button[onclick*="${canvasId}"]`);
+    if (btn) {
+        const orig = btn.textContent;
+        btn.textContent = '✓ Saved!';
+        btn.style.color = '#10b981';
+        btn.style.opacity = '1';
+        setTimeout(() => { btn.textContent = orig; btn.style.color = ''; btn.style.opacity = ''; }, 1800);
+    }
+};
+
+/* ─── Auto-resize chart wrapper ─── */
+/**
+ * After creating a chart, call this to set the wrapper height based on the data.
+ * wrapperId   : id of the div.chart-wrap / div.chart-wrap-res
+ * chartType   : 'scatter'|'line'|'bar'|'bar-h' (horizontal bar = tornado)
+ * dataCount   : number of rows/points (for vertical bar/tornado: sets height per bar)
+ * dataRange   : { min, max } for the primary axis — used to add breathing room
+ * minH / maxH : pixel floor/ceiling
+ */
+function autoResizeChart(wrapperId, chartType, dataCount, minH, maxH) {
+    const wrap = document.getElementById(wrapperId);
+    if (!wrap) return;
+
+    let h;
+    if (chartType === 'bar-h') {
+        // Horizontal bar (tornado): each bar needs ~36px, plus axis overhead
+        h = Math.max(minH || 200, Math.min(maxH || 600, 60 + dataCount * 38));
+    } else {
+        // Scatter, line, vertical bar: use a comfortable fixed height scaled to data density
+        // More data points → slightly taller to avoid overcrowding
+        const base = minH || 280;
+        h = Math.min(maxH || 420, base + Math.max(0, (dataCount - 12) * 4));
+    }
+
+    wrap.style.height = h + 'px';
+}
+
+/* ─── Cost builder (sidebar calculator for VR therapy cost) ─── */
+window.calcCostBuilder = function () {
+    const hw    = parseFloat(document.getElementById('cb_hw')?.value)   || 0;
+    const hwyr  = parseFloat(document.getElementById('cb_hwyr')?.value) || 1;
+    const ppy   = parseFloat(document.getElementById('cb_ppy')?.value)  || 1;
+    const sw    = parseFloat(document.getElementById('cb_sw')?.value)   || 0;
+    const tr    = parseFloat(document.getElementById('cb_tr')?.value)   || 0;
+    const tryr  = parseFloat(document.getElementById('cb_tryr')?.value) || 1;
+    const st    = parseFloat(document.getElementById('cb_st')?.value)   || 0;
+    const cons  = parseFloat(document.getElementById('cb_cons')?.value) || 0;
+
+    // Hardware amortised per patient = (£hw / hwyr) / ppy
+    const hwPP  = (hw / hwyr) / ppy;
+    // Software licence per patient = £sw/yr / ppy
+    const swPP  = sw / ppy;
+    // Training amortised per patient = (£tr / tryr) / ppy
+    const trPP  = (tr / tryr) / ppy;
+    // Staff + consumables are already per-patient
+    const total = hwPP + swPP + trPP + st + cons;
+
+    const el = document.getElementById('cb_result');
+    if (el) {
+        el.textContent = '£' + total.toFixed(2) + '/pt';
+        el.style.color  = total <= 219.32 ? '#10b981' : total <= 245.52 ? '#38bdf8' : '#f59e0b';
+        // Tooltip breakdown
+        el.title = [
+            `Hardware:  £${hwPP.toFixed(2)}/pt  (£${hw} ÷ ${hwyr}yr ÷ ${ppy}pts/yr)`,
+            `Software:  £${swPP.toFixed(2)}/pt  (£${sw}/yr ÷ ${ppy}pts/yr)`,
+            `Training:  £${trPP.toFixed(2)}/pt  (£${tr} ÷ ${tryr}yr ÷ ${ppy}pts/yr)`,
+            `Staff:     £${st.toFixed(2)}/pt`,
+            `Consumables: £${cons.toFixed(2)}/pt`,
+            `─────────────────────`,
+            `TOTAL:     £${total.toFixed(2)}/pt`,
+        ].join('\n');
+    }
+    return total;
+};
+
+window.applyCostBuilder = function () {
+    const total = window.calcCostBuilder();
+    const field = document.getElementById('vrCost');
+    if (field) {
+        field.value = total.toFixed(2);
+        recalculateAll();
+    }
+};
+
+/* ─── System Price → per-patient calculator ─── */
+window.calcSystemPrice = function () {
+    const total = parseFloat(document.getElementById('sp_total')?.value) || 0;
+    const ppy   = parseFloat(document.getElementById('sp_ppy')?.value)   || 1;
+    const life  = parseFloat(document.getElementById('sp_life')?.value)  || 1;
+    const perPt = total / (ppy * life);
+    const el    = document.getElementById('sp_result');
+    if (el) {
+        el.textContent = '£' + perPt.toFixed(2) + '/pt';
+        // Colour-code against the CS ceiling (£219.32 at base)
+        el.style.color = perPt <= 219.32 ? '#10b981' : perPt <= 245.52 ? '#38bdf8' : '#f59e0b';
+        el.title = `£${total.toLocaleString('en-GB')} ÷ (${ppy} pts/yr × ${life} yrs) = £${perPt.toFixed(2)}/patient`;
+    }
+    return perPt;
+};
+
+window.applySystemPrice = function () {
+    const perPt = window.calcSystemPrice();
+    const field = document.getElementById('costOneOff');
+    if (field) {
+        field.value = perPt.toFixed(2);
+        recalculateAll();
+    }
+};
+
+// Run once on load to initialise both calculators
 document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('cb_hw'))    window.calcCostBuilder();
+    if (document.getElementById('sp_total')) window.calcSystemPrice();
+});
 
-    Chart.defaults.color = '#cbd5e1';
-    Chart.defaults.font.family = "'Inter', sans-serif";
+/* ─── Reverse efficacy solver ─────────────────────────────────────────────
+ * Groenveld's approach: given system price, find the MINIMUM within-group
+ * efficacy % that makes the model CS / CE at the specified WTP.
+ *
+ * Binary search on painReduction (0–50%) with the device cost set to zero
+ * (thresholds are device-independent), comparing the resulting threshold
+ * against the user's actual total cost.
+ * ──────────────────────────────────────────────────────────────────────── */
+function solveMinEfficacy(targetType, totalCost) {
+    if (totalCost <= 0) return 0;
+    const base = getInputs();
+    let lo = 0, hi = 50;
+    for (let i = 0; i < 80; i++) {
+        const mid = (lo + hi) / 2;
+        // Strip device cost — thresholds are independent of price
+        const m = new PLPMarkovModel({ ...base, vrCost: 0, costOneOff: 0, painReduction: mid });
+        const r = m.run();
+        let threshold;
+        if      (targetType === 'cs')   threshold = r.costSavingThreshold;
+        else if (targetType === 'ce25') threshold = r.costEffectiveThreshold25 ?? r.costEffectiveThreshold;
+        else                            threshold = r.costEffectiveThreshold35  ?? r.costEffectiveThreshold;
+        if (threshold >= totalCost) hi = mid;
+        else                        lo = mid;
+    }
+    const result = (lo + hi) / 2;
+    // If even at 0% efficacy the threshold exceeds cost (impossible here) or
+    // at 50% we still can't reach it, return Infinity
+    const mCheck = new PLPMarkovModel({ ...base, vrCost: 0, costOneOff: 0, painReduction: 50 });
+    const rCheck = mCheck.run();
+    const maxThr = targetType === 'cs'   ? rCheck.costSavingThreshold
+                 : targetType === 'ce25' ? (rCheck.costEffectiveThreshold25 ?? rCheck.costEffectiveThreshold)
+                 :                         (rCheck.costEffectiveThreshold35  ?? rCheck.costEffectiveThreshold);
+    return maxThr < totalCost ? Infinity : result;
+}
 
-    let currentCurrency = 'GBP';
-    const rate_eur_to_gbp = 0.854;
-    let societalChartInstance = null;
-
-    function formatCurrency(value) {
-        if (currentCurrency === 'GBP') {
-            return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value);
-        }
-        return new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR' }).format(value);
+/* Called from recalculateAll() whenever inputs change */
+function updateMinEfficacyDisplay(inputs) {
+    const totalCost = inputs.vrCost + inputs.costOneOff;
+    if (totalCost <= 0) {
+        setText('meCS',   '—'); setText('meCE25', '—'); setText('meCE35', '—');
+        setText('meCurrent', 'Enter a price above');
+        return;
     }
 
-    let lastActiveDashboard = 'adv';
+    const fmtEff = n => isFinite(n) ? n.toFixed(4) + '%' : '> 50%';
 
-    const globalInputIds = [
-        'cpspRiskGlobal', 'opioidReductionGlobal',
-        'utilPfGlobal', 'utilNonOpGlobal', 'utilOpioidGlobal', 'utilCpspGlobal',
-        'costGPGlobal', 'costSpecialistGlobal', 'costChronicCareGlobal', 'costCaregiverGlobal',
-        'informalCareCPSPGlobal', 'informalCareOpioidGlobal', 'informalCareNonOpioidGlobal',
-        'vrCostGlobal', 'popAgeGlobal', 'pctMaleGlobal', 'wtpGlobal',
-        'drugCostOpioidStableGlobal', 'drugCostOpioidDecreaseGlobal', 'drugCostParacetamolGlobal',
-        'travelCostKmGlobal', 'travelDistanceGlobal', 'parkingCostGlobal',
-        
-        'transPfNonOp_m1Global', 'transPfNonOp_m2Global', 'transPfNonOp_m3Global', 'transPfNonOp_m4_12Global',
-        'transNonOpPF_m1Global', 'transNonOpPF_m2Global', 'transNonOpPF_m3Global', 'transNonOpPF_m4_12Global',
-        'transNonOpOp_m1Global', 'transNonOpOp_m2Global', 'transNonOpOp_m3Global', 'transNonOpOp_m4_12Global',
-        'transOpioidPF_m1Global', 'transOpioidPF_m2Global', 'transOpioidPF_m3Global', 'transOpioidPF_m4_12Global',
-        'transOpioidNonOp_m1Global', 'transOpioidNonOp_m2Global', 'transOpioidNonOp_m3Global', 'transOpioidNonOp_m4_12Global',
-        
-        'transNonOpCpsp_m1Global', 'transNonOpCpsp_m2Global', 'transNonOpCpsp_m3Global', 'transNonOpCpsp_m4_12Global',
-        'transOpioidCpsp_m1Global', 'transOpioidCpsp_m2Global', 'transOpioidCpsp_m3Global', 'transOpioidCpsp_m4_12Global',
-        'transCpspPF_m1Global', 'transCpspPF_m2Global', 'transCpspPF_m3Global', 'transCpspPF_m4_12Global',
-        
-        'deathRisk_m1Global', 'deathRisk_m2Global', 'deathRisk_m3Global', 'deathRisk_m4_12Global',
-        
-        'gpPF_m1Global', 'gpPF_m2Global', 'gpPF_m3Global', 'gpPF_m4_12Global',
-        'gpNonOp_m1Global', 'gpNonOp_m2Global', 'gpNonOp_m3Global', 'gpNonOp_m4_12Global',
-        'gpOp_m1Global', 'gpOp_m2Global', 'gpOp_m3Global', 'gpOp_m4_12Global',
-        'gpCpsp_m1Global', 'gpCpsp_m2Global', 'gpCpsp_m3Global', 'gpCpspGlobal',
-        
-        'specNonOp_m1Global', 'specNonOp_m2Global', 'specNonOp_m3Global', 'specNonOp_m4_12Global',
-        'specOp_m1Global', 'specOp_m2Global', 'specOp_m3Global', 'specOp_m4_12Global',
-        'specCpsp_m1Global', 'specCpsp_m2Global', 'specCpsp_m3Global', 'specCpspGlobal'
-    ];
+    const eCS   = solveMinEfficacy('cs',   totalCost);
+    const eCE25 = solveMinEfficacy('ce25', totalCost);
+    const eCE35 = solveMinEfficacy('ce35', totalCost);
+    const eCurrent = inputs.painReduction;
 
-    function parseGlobalVal(id, fallback = 0) {
-        const el = document.getElementById(id);
-        return el && el.value !== "" ? parseFloat(el.value) : fallback;
-    }
+    setText('meCS',   fmtEff(eCS));
+    setText('meCE25', fmtEff(eCE25));
+    setText('meCE35', fmtEff(eCE35));
 
-    function setupDashboard(prefix) {
-        const id = (base) => {
-            if (prefix === 'plp') {
-                if (base === 'opioidReduction') return 'painReductionPlp';
-                if (base === 'opioidReductionNum') return 'painReductionNumPlp';
-                if (base === 'cpspRisk') return 'plpRiskPlp';
-                if (base === 'cpspRiskNum') return 'plpRiskNumPlp';
-            }
-            return base + (prefix === 'adv' ? 'Adv' : (prefix === 'plp' ? 'Plp' : ''));
-        };
-        
-        const elements = {
-            wtp: document.getElementById(id('wtp')),
-            vrCost: document.getElementById(id('vrCost')),
-            vrCostNum: document.getElementById(id('vrCostNum')),
-            opioidReduction: document.getElementById(id('opioidReduction')),
-            opioidReductionNum: document.getElementById(id('opioidReductionNum')),
-            cpspRisk: document.getElementById(id('cpspRisk')),
-            cpspRiskNum: document.getElementById(id('cpspRiskNum')),
-            
-            statusIndicator: document.getElementById(id('costEffectiveStatus')),
-            resetBtn: document.getElementById(id('resetBtn')),
-            
-            kpiIncCost: document.getElementById(id('kpiIncCost')),
-            kpiIncQaly: document.getElementById(id('kpiIncQaly')),
-            kpiIcer: document.getElementById(id('kpiIcer')),
-            kpiNmb: document.getElementById(id('kpiNmb')),
-            summaryAnalysis: document.getElementById(id('summaryAnalysis')),
-            
-            btnEur: document.getElementById(id('btnEur')),
-            btnGbp: document.getElementById(id('btnGbp')),
-            
-            wtpLabel: document.querySelector(`label[for="${id('wtp')}"]`),
-            vrCostLabel: document.querySelector(`label[for="${id('vrCost')}"]`)
-        };
-
-
-
-        let cePlaneChartInstance = null;
-        let tornadoChartInstance = null;
-        let headroomChartInstance = null;
-
-
-
-        function formatNumber(value, decimals=4) {
-            return parseFloat(value).toFixed(decimals);
-        }
-
-        function getInputValues() {
-            let params = {
-                wtp: parseFloat(elements.wtp.value),
-                vrCost: parseFloat(elements.vrCost.value),
-                opioidReduction: parseFloat(elements.opioidReduction.value),
-                cpspRisk: parseFloat(elements.cpspRisk.value),
-                currency: currentCurrency
-            };
-            
-            if (prefix === 'adv' || prefix === 'plp') {
-                const cap = prefix.charAt(0).toUpperCase() + prefix.slice(1);
-                const patientsPerSys = parseFloat(document.getElementById('patientsPerSystem' + cap).value) || 1;
-                params.oneOffCost = (parseFloat(document.getElementById('oneOffCost' + cap).value) || 0) / patientsPerSys;
-                params.sessionCost = parseFloat(document.getElementById('sessionCost' + cap).value) || 0;
-                params.numSessions = parseFloat(document.getElementById('numSessions' + cap).value) || 1;
-                
-                params.utilPainFree = parseFloat(document.getElementById('utilPf' + cap).value);
-                params.utilNonOpioid = parseFloat(document.getElementById('utilNonOp' + cap).value);
-                params.utilOpioid = parseFloat(document.getElementById('utilOpioid' + cap).value);
-                params.utilCPSP = parseFloat(document.getElementById('utilCpsp' + cap).value);
-                
-                params.costNonOpioid = parseFloat(document.getElementById('costNonOp' + cap).value);
-                params.costOpioid = parseFloat(document.getElementById('costOpioid' + cap).value);
-                params.costCPSP = parseFloat(document.getElementById('costCpsp' + cap).value);
-            }
-            
-            return params;
-        }
-
-        function updateLabelOutputs() {
-            // Handled explicitly in listeners now
-        }
-
-        function initCharts(results) {
-            const cePlaneCtx = document.getElementById(id('cePlaneChart')).getContext('2d');
-            const tornadoCtx = document.getElementById(id('tornadoChart')).getContext('2d');
-            const headroomCtx = document.getElementById(id('headroomChart')).getContext('2d');
-
-            cePlaneChartInstance = new Chart(cePlaneCtx, {
-                type: 'scatter',
-                data: {
-                    datasets: [
-                        { label: 'Base Case', data: [{ x: results.incQaly, y: results.incCost }], backgroundColor: results.nmb >= 0 ? '#10b981' : '#ef4444', pointStyle: 'rectRot', pointRadius: 10,  order: 1 },
-                        { label: 'Probabilistic Iterations (N=200)', data: results.psa.map(d => ({x:d.x, y:d.y})), backgroundColor: 'rgba(56, 189, 248, 0.5)', pointRadius: 4, order: 2 }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { x: { title: { display: true, text: 'Incremental QALYs (ΔE)' } }, y: { title: { display: true, text: `Incremental Costs (ΔC) [${currentCurrency==='EUR'?'€':'£'}]` } } } }
-            });
-
-            tornadoChartInstance = new Chart(tornadoCtx, {
-                type: 'bar',
-                data: { labels: results.tornado.data.map(d => d.label), datasets: [ { label: 'Low Impact Bound (ICER)', data: results.tornado.data.map(d => d.lowImpactValue - results.tornado.baseICER), backgroundColor: '#f59e0b' }, { label: 'High Impact Bound (ICER)', data: results.tornado.data.map(d => d.highImpactValue - results.tornado.baseICER), backgroundColor: '#38bdf8' } ] },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: function(c) { return c.dataset.label + ': ' + formatCurrency(c.raw + results.tornado.baseICER) + '/QALY'; } } } }, scales: { x: { title: { display: true, text: 'ICER in cost per QALY' } } } }
-            });
-
-            headroomChartInstance = new Chart(headroomCtx, {
-                type: 'line',
-                data: {
-                    labels: results.headroom.map(d => d.effectiveness + '%'),
-                    datasets: [
-                        { label: 'Cost-saving', data: results.headroom.map(d => d.costSavingMax), borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.4)', fill: true, tension: 0.1 },
-                        { label: 'Cost-effective', data: results.headroom.map(d => d.costEffectiveMax), borderColor: '#38bdf8', backgroundColor: 'rgba(56, 189, 248, 0.4)', fill: '-1', tension: 0.1 },
-                        { label: 'Not cost-effective', data: results.headroom.map(d => Math.max(200, d.costEffectiveMax + 100)), borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.2)', fill: '-1', tension: 0.1, pointRadius: 0 }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { x: { title: { display: true, text: 'Effect of VR therapy: % reduction in patients going home with opioids' } }, y: { max: 150, title: { display: true, text: `Cost of VR therapy per patient (${currentCurrency==='EUR'?'€':'£'})` }, min: 0 } } }
-            });
-        }
-
-        function updateCharts(results) {
-            if (!cePlaneChartInstance) { initCharts(results); return; }
-
-            cePlaneChartInstance.data.datasets[0].data = [{ x: results.incQaly, y: results.incCost }];
-            cePlaneChartInstance.data.datasets[0].backgroundColor = results.nmb >= 0 ? '#10b981' : '#ef4444';
-            cePlaneChartInstance.data.datasets[1].data = results.psa.map(d => ({ x: d.x, y: d.y }));
-            cePlaneChartInstance.options.scales.y.title.text = `Incremental Costs (ΔC) [${currentCurrency==='EUR'?'€':'£'}]`;
-            cePlaneChartInstance.update();
-
-            tornadoChartInstance.data.datasets[0].data = results.tornado.data.map(d => d.lowImpactValue - results.tornado.baseICER);
-            tornadoChartInstance.data.datasets[1].data = results.tornado.data.map(d => d.highImpactValue - results.tornado.baseICER);
-            tornadoChartInstance.update();
-
-            headroomChartInstance.data.labels = results.headroom.map(d => d.effectiveness + '%');
-            headroomChartInstance.data.datasets[0].data = results.headroom.map(d => d.costSavingMax);
-            headroomChartInstance.data.datasets[1].data = results.headroom.map(d => d.costEffectiveMax);
-            headroomChartInstance.data.datasets[2].data = results.headroom.map(d => Math.max(200, d.costEffectiveMax + 100));
-            headroomChartInstance.options.scales.y.title.text = `Cost of VR therapy per patient (${currentCurrency==='EUR'?'€':'£'})`;
-            headroomChartInstance.update();
-        }
-
-        function runModel() {
-            const params = getInputValues();
-            updateLabelOutputs();
-
-            const model = new MarkovModel(params);
-            model.baseParams.currency = currentCurrency;
-            
-            const results = model.run();
-            results.tornado = model.runSensitivityAnalysis();
-            results.headroom = model.runHeadroomAnalysis();
-            results.psa = model.runProbabilisticSensitivityAnalysis(200); 
-
-            elements.kpiIncCost.textContent = formatCurrency(results.incCost);
-            elements.kpiIncCost.style.color = results.incCost > 0 ? 'var(--danger)' : 'var(--success)';
-            elements.kpiIncQaly.textContent = formatNumber(results.incQaly);
-            elements.kpiIncQaly.style.color = results.incQaly > 0 ? 'var(--success)' : 'var(--danger)';
-            elements.kpiNmb.textContent = formatCurrency(results.nmb);
-            elements.kpiNmb.style.color = results.nmb >= 0 ? 'var(--success)' : 'var(--danger)';
-
-            if (results.incQaly > 0 && results.incCost <= 0) {
-                elements.kpiIcer.textContent = "Dominant";
-                elements.kpiIcer.style.color = "var(--success)";
-            } else if (results.incQaly < 0 && results.incCost >= 0) {
-                elements.kpiIcer.textContent = "Dominated";
-                elements.kpiIcer.style.color = "var(--danger)";
-            } else {
-                elements.kpiIcer.textContent = formatCurrency(results.icer) + '/QALY';
-                elements.kpiIcer.style.color = results.icer <= params.wtp ? 'var(--warning)' : 'var(--danger)';
-            }
-
-            if (results.nmb >= 0) {
-                elements.statusIndicator.textContent = "Cost-Effective";
-                elements.statusIndicator.className = "status-indicator status-effective";
-            } else {
-                elements.statusIndicator.textContent = "Not Cost-Effective";
-                elements.statusIndicator.className = "status-indicator status-ineffective";
-            }
-
-            let summaryHtml = `<p>At a WTP threshold of <span class="highlight-text">${formatCurrency(params.wtp)}/QALY</span>, VR therapy is <strong>${results.nmb >= 0 ? 'Cost-Effective' : 'NOT Cost-Effective'}</strong>.</p>`;
-            elements.summaryAnalysis.innerHTML = `<h2>Analysis Summary</h2>${summaryHtml}`;
-
-            updateCharts(results);
-            if (prefix === 'adv' && typeof updateSocietalForecast === 'function') {
-                updateSocietalForecast(); if (typeof updateHtaAnalysis === 'function') updateHtaAnalysis();
-            }
-        }
-
-        function setCurrency(targetCurrency) {
-            if (currentCurrency === targetCurrency) return;
-            currentCurrency = targetCurrency;
-
-            if (targetCurrency === 'GBP') {
-                elements.btnGbp.style.background = 'var(--accent-primary)';
-                elements.btnGbp.style.color = '#fff';
-                elements.btnEur.style.background = 'transparent';
-                elements.btnEur.style.color = 'var(--text-secondary)';
-                elements.wtpLabel.textContent = 'Willingness to Pay (WTP) per QALY (£)';
-                elements.vrCostLabel.textContent = 'VR Therapy Cost per Patient (£)';
-                
-                elements.wtp.value = Math.round(parseFloat(elements.wtp.value) * rate_eur_to_gbp);
-                elements.vrCost.value = (parseFloat(elements.vrCost.value) * rate_eur_to_gbp).toFixed(2);
-            } else {
-                /*... handled natively by HTML ...*/;
-                elements.btnEur.style.color = '#fff';
-                elements.btnGbp.style.background = 'transparent';
-                elements.btnGbp.style.color = 'var(--text-secondary)';
-                elements.wtpLabel.textContent = 'Willingness to Pay (WTP) per QALY (€)';
-                elements.vrCostLabel.textContent = 'VR Therapy Cost per Patient (€)';
-                
-                elements.wtp.value = Math.round(parseFloat(elements.wtp.value) / rate_eur_to_gbp);
-                elements.vrCost.value = (parseFloat(elements.vrCost.value) / rate_eur_to_gbp).toFixed(2);
-            }
-            runModel();
-        if (prefix === "vr") window.updateDashboardVr = runModel;
-        else if (prefix === "adv") window.updateDashboardAdv = runModel;
-        else if (prefix === "plp") window.updateDashboardPlp = runModel;
-        }
-
-        elements.btnEur.addEventListener('click', () => setCurrency('EUR'));
-        elements.btnGbp.addEventListener('click', () => setCurrency('GBP'));
-        
-        let presetE = document.getElementById(id('presetCostEffective'));
-        let presetS = document.getElementById(id('presetCostSaving'));
-        if (presetE) presetE.addEventListener('click', () => { elements.opioidReduction.value = 2.5; runModel(); });
-        if (presetS) presetS.addEventListener('click', () => { elements.opioidReduction.value = 6.5; runModel(); });
-
-        let listeners = [elements.wtp, elements.vrCost, elements.opioidReduction, elements.cpspRisk];
-        if (prefix === 'adv' || prefix === 'plp') {
-            const cap = prefix.charAt(0).toUpperCase() + prefix.slice(1);
-            listeners = listeners.concat([
-                document.getElementById('oneOffCost' + cap), 
-                document.getElementById('sessionCost' + cap), 
-                document.getElementById('numSessions' + cap),
-                document.getElementById('patientsPerSystem' + cap),
-                document.getElementById('utilPf' + cap), 
-                document.getElementById('utilNonOp' + cap),
-                document.getElementById('utilOpioid' + cap), 
-                document.getElementById('utilCpsp' + cap),
-                document.getElementById('costNonOp' + cap), 
-                document.getElementById('costOpioid' + cap),
-                document.getElementById('costCpsp' + cap)
-            ]);
-        }
-        listeners.forEach((el) => { if (el) el.addEventListener('input', runModel) });
-        // Set initial nums
-        elements.vrCostNum.value = elements.vrCost.value;
-        elements.opioidReductionNum.value = elements.opioidReduction.value;
-        elements.cpspRiskNum.value = elements.cpspRisk.value;
-
-        elements.resetBtn.addEventListener('click', () => {
-            elements.wtp.value = currentCurrency === 'EUR' ? Math.round(20000 / rate_eur_to_gbp) : 20000;
-            elements.vrCost.value = currentCurrency === 'EUR' ? (40.55 / rate_eur_to_gbp).toFixed(2) : 40.55;
-            elements.opioidReduction.value = 2.8;
-            elements.cpspRisk.value = 15;
-            runModel();
-        if (prefix === "vr") window.updateDashboardVr = runModel;
-        else if (prefix === "adv") window.updateDashboardAdv = runModel;
-        else if (prefix === "plp") window.updateDashboardPlp = runModel;
-        });
-
-        runModel();
-        if (prefix === "vr") window.updateDashboardVr = runModel;
-        else if (prefix === "adv") window.updateDashboardAdv = runModel;
-        else if (prefix === "plp") window.updateDashboardPlp = runModel;
-    }
-
-    // Initialize all three dashboards uniquely
-    setupDashboard('vr');
-    setupDashboard('adv');
-    setupDashboard('plp');
-
-    // Tab Switching Logic
-    const btnTabVr = document.getElementById('btnTabVr');
-    const btnTabAdv = document.getElementById('btnTabAdv');
-    const btnTabTable = document.getElementById('btnTabTable');
-    
-    const tabVr = document.getElementById('tab-vr');
-    const tabAdv = document.getElementById('tab-adv');
-    const tabTable = document.getElementById('tab-table');
-
-    const btnTabSocietal = document.getElementById('btnTabSocietal');
-    const tabSocietal = document.getElementById('tab-societal');
-    const btnTabPlp = document.getElementById('btnTabPlp');
-    const tabPlp = document.getElementById('tab-plp');
-    const btnTabHta = document.getElementById('btnTabHta');
-    const tabHta = document.getElementById('tab-hta');
-    const btnTabEquations = document.getElementById('btnTabEquations');
-    const tabEquations = document.getElementById('tab-equations');
-
-    function switchTab(activeBtn, activeTab) {
-        [btnTabVr, btnTabAdv, btnTabPlp, btnTabHta, btnTabEquations, btnTabTable, btnTabSocietal].forEach(b => b.classList.remove('active'));
-        [tabVr, tabAdv, tabPlp, tabHta, tabEquations, tabTable, tabSocietal].forEach(t => t.classList.remove('active'));
-        
-        activeBtn.classList.add('active');
-        activeTab.classList.add('active');
-        
-        if (activeBtn === btnTabSocietal) {
-            updateSocietalForecast(); if (typeof updateHtaAnalysis === 'function') updateHtaAnalysis();
-        } else if (activeBtn === btnTabHta) {
-            updateHtaAnalysis();
-        }
-    }
-
-    btnTabVr.addEventListener('click', () => switchTab(btnTabVr, tabVr));
-    btnTabAdv.addEventListener('click', () => { lastActiveDashboard = 'adv'; switchTab(btnTabAdv, tabAdv); });
-    btnTabPlp.addEventListener('click', () => { lastActiveDashboard = 'plp'; switchTab(btnTabPlp, tabPlp); });
-    btnTabHta.addEventListener('click', () => switchTab(btnTabHta, tabHta));
-    btnTabEquations.addEventListener('click', () => switchTab(btnTabEquations, tabEquations));
-    btnTabTable.addEventListener('click', () => switchTab(btnTabTable, tabTable));
-    btnTabSocietal.addEventListener('click', () => switchTab(btnTabSocietal, tabSocietal));
-
-    // Threshold Solver Logic
-    const modal = document.getElementById('thresholdsModal');
-    const closeModalBtn = document.getElementById('closeModal');
-    const modalCeVal = document.getElementById('modalCeThreshold');
-    const modalCsVal = document.getElementById('modalCsThreshold');
-    const modalCeTitle = document.getElementById('modalCeTitle');
-    const applyCeBtn = document.getElementById('btnApplyCeThreshold');
-    const applyCsBtn = document.getElementById('btnApplyCsThreshold');
-    const modalNote = document.getElementById('modalContextNote');
-
-    let solverActivePrefix = 'vr';
-    let solvedCeValue = 2.8;
-    let solvedCsValue = 6.5;
-
-    function solveThresholds(prefix) {
-        solverActivePrefix = prefix;
-        const id_prefix = prefix === 'adv' ? 'Adv' : (prefix === 'plp' ? 'Plp' : '');
-        const isPlp = prefix === 'plp';
-        
-        // Obtain the active input controls on this dashboard page
-        const solverInputs = {
-            wtp: parseFloat(document.getElementById('wtp' + id_prefix).value),
-            vrCost: parseFloat(document.getElementById('vrCost' + id_prefix).value),
-            cpspRisk: parseFloat(document.getElementById(isPlp ? 'plpRiskPlp' : ('cpspRisk' + id_prefix)).value),
-            currency: currentCurrency
-        };
-
-        // Extract global Table 1 settings baseline
-        let g = {
-            utilPainFree: parseGlobalVal('utilPfGlobal', 1.0),
-            utilNonOpioid: parseGlobalVal('utilNonOpGlobal', 0.93),
-            utilOpioid: parseGlobalVal('utilOpioidGlobal', 0.61),
-            utilCPSP: parseGlobalVal('utilCpspGlobal', 0.59),
-            costGP: parseGlobalVal('costGPGlobal', 32.04),
-            costSpecialist: parseGlobalVal('costSpecialistGlobal', 225.00),
-            costChronicCare: parseGlobalVal('costChronicCareGlobal', 119.51),
-            costCaregiver: parseGlobalVal('costCaregiverGlobal', 19.51),
-            informalCareCPSP: parseGlobalVal('informalCareCPSPGlobal', 20),
-            informalCareOpioid: parseGlobalVal('informalCareOpioidGlobal', 20),
-            informalCareNonOpioid: parseGlobalVal('informalCareNonOpioidGlobal', 8),
-            popAge: parseGlobalVal('popAgeGlobal', 65),
-            pctMale: parseGlobalVal('pctMaleGlobal', 0.50),
-            drugCostOpioidStable: parseGlobalVal('drugCostOpioidStableGlobal', 0.35),
-            drugCostOpioidDecrease: parseGlobalVal('drugCostOpioidDecreaseGlobal', 0.24),
-            drugCostParacetamol: parseGlobalVal('drugCostParacetamolGlobal', 0.03),
-            travelCostKm: parseGlobalVal('travelCostKmGlobal', 0.26),
-            travelDistance: parseGlobalVal('travelDistanceGlobal', 7.1),
-            parkingCost: parseGlobalVal('parkingCostGlobal', 3.92),
-            transPfNonOp_m1: parseGlobalVal('transPfNonOp_m1Global', 0.1176),
-            transPfNonOp_m2: parseGlobalVal('transPfNonOp_m2Global', 0.0000),
-            transPfNonOp_m3: parseGlobalVal('transPfNonOp_m3Global', 0.0000),
-            transPfNonOp_m4_12: parseGlobalVal('transPfNonOp_m4_12Global', 0.0000),
-            transNonOpPF_m1: parseGlobalVal('transNonOpPF_m1Global', 0.0000),
-            transNonOpPF_m2: parseGlobalVal('transNonOpPF_m2Global', 1.0000),
-            transNonOpPF_m3: parseGlobalVal('transNonOpPF_m3Global', 0.7297),
-            transNonOpPF_m4_12: parseGlobalVal('transNonOpPF_m4_12Global', 0.0000),
-            transNonOpOp_m1: parseGlobalVal('transNonOpOp_m1Global', 0.1299),
-            transNonOpOp_m2: parseGlobalVal('transNonOpOp_m2Global', 0.0000),
-            transNonOpOp_m3: parseGlobalVal('transNonOpOp_m3Global', 0.0000),
-            transNonOpOp_m4_12: parseGlobalVal('transNonOpOp_m4_12Global', 0.0000),
-            transOpioidPF_m1: parseGlobalVal('transOpioidPF_m1Global', 0.0000),
-            transOpioidPF_m2: parseGlobalVal('transOpioidPF_m2Global', 0.4841),
-            transOpioidPF_m3: parseGlobalVal('transOpioidPF_m3Global', 0.0000),
-            transOpioidPF_m4_12: parseGlobalVal('transOpioidPF_m4_12Global', 0.0000),
-            transOpioidNonOp_m1: parseGlobalVal('transOpioidNonOp_m1Global', 0.0000),
-            transOpioidNonOp_m2: parseGlobalVal('transOpioidNonOp_m2Global', 0.2937),
-            transOpioidNonOp_m3: parseGlobalVal('transOpioidNonOp_m3Global', 0.4643),
-            transOpioidNonOp_m4_12: parseGlobalVal('transOpioidNonOp_m4_12Global', 0.0000),
-            transNonOpCpsp_m1: parseGlobalVal('transNonOpCpsp_m1Global', 0.0000),
-            transNonOpCpsp_m2: parseGlobalVal('transNonOpCpsp_m2Global', 0.0000),
-            transNonOpCpsp_m3: parseGlobalVal('transNonOpCpsp_m3Global', 0.0000),
-            transNonOpCpsp_m4_12: parseGlobalVal('transNonOpCpsp_m4_12Global', 1.0000),
-            transOpioidCpsp_m1: parseGlobalVal('transOpioidCpsp_m1Global', 0.0000),
-            transOpioidCpsp_m2: parseGlobalVal('transOpioidCpsp_m2Global', 0.0000),
-            transOpioidCpsp_m3: parseGlobalVal('transOpioidCpsp_m3Global', 0.0000),
-            transOpioidCpsp_m4_12: parseGlobalVal('transOpioidCpsp_m4_12Global', 1.0000),
-            transCpspPF_m1: parseGlobalVal('transCpspPF_m1Global', 0.0000),
-            transCpspPF_m2: parseGlobalVal('transCpspPF_m2Global', 0.0000),
-            transCpspPF_m3: parseGlobalVal('transCpspPF_m3Global', 0.0000),
-            transCpspPF_m4_12: parseGlobalVal('transCpspPF_m4_12Global', 0.0286),
-            deathRisk_m1: parseGlobalVal('deathRisk_m1Global', 0.0005),
-            deathRisk_m2: parseGlobalVal('deathRisk_m2Global', 0.0005),
-            deathRisk_m3: parseGlobalVal('deathRisk_m3Global', 0.0005),
-            deathRisk_m4_12: parseGlobalVal('deathRisk_m4_12Global', 0.0005),
-            gpPF_m1: parseGlobalVal('gpPF_m1Global', 0.03),
-            gpPF_m2: parseGlobalVal('gpPF_m2Global', 0.01),
-            gpPF_m3: parseGlobalVal('gpPF_m3Global', 0.02),
-            gpPF_m4_12: parseGlobalVal('gpPF_m4_12Global', 0.01),
-            gpNonOp_m1: parseGlobalVal('gpNonOp_m1Global', 0.11),
-            gpNonOp_m2: parseGlobalVal('gpNonOp_m2Global', 0.14),
-            gpNonOp_m3: parseGlobalVal('gpNonOp_m3Global', 0.30),
-            gpNonOp_m4_12: parseGlobalVal('gpNonOp_m4_12Global', 0.00),
-            gpOp_m1: parseGlobalVal('gpOp_m1Global', 0.23),
-            gpOp_m2: parseGlobalVal('gpOp_m2Global', 0.50),
-            gpOp_m3: parseGlobalVal('gpOp_m3Global', 0.60),
-            gpOp_m4_12: parseGlobalVal('gpOp_m4_12Global', 0.00),
-            gpCpsp_m1: parseGlobalVal('gpCpsp_m1Global', 0.00),
-            gpCpsp_m2: parseGlobalVal('gpCpsp_m2Global', 0.00),
-            gpCpsp_m3: parseGlobalVal('gpCpsp_m3Global', 0.00),
-            gpCpsp: parseGlobalVal('gpCpspGlobal', 0.61),
-            specNonOp_m1: parseGlobalVal('specNonOp_m1Global', 0.10),
-            specNonOp_m2: parseGlobalVal('specNonOp_m2Global', 0.10),
-            specNonOp_m3: parseGlobalVal('specNonOp_m3Global', 0.10),
-            specNonOp_m4_12: parseGlobalVal('specNonOp_m4_12Global', 0.00),
-            specOp_m1: parseGlobalVal('specOp_m1Global', 0.20),
-            specOp_m2: parseGlobalVal('specOp_m2Global', 0.20),
-            specOp_m3: parseGlobalVal('specOp_m3Global', 0.20),
-            specOp_m4_12: parseGlobalVal('specOp_m4_12Global', 0.00),
-            specCpsp_m1: parseGlobalVal('specCpsp_m1Global', 0.00),
-            specCpsp_m2: parseGlobalVal('specCpsp_m2Global', 0.00),
-            specCpsp_m3: parseGlobalVal('specCpsp_m3Global', 0.00),
-            specCpsp: parseGlobalVal('specCpspGlobal', 0.30)
-        };
-
-        if (prefix === 'adv' || prefix === 'plp') {
-            const cap = prefix.charAt(0).toUpperCase() + prefix.slice(1);
-            g.utilPainFree = parseGlobalVal('utilPf' + cap, g.utilPainFree);
-            g.utilNonOpioid = parseGlobalVal('utilNonOp' + cap, g.utilNonOpioid);
-            g.utilOpioid = parseGlobalVal('utilOpioid' + cap, g.utilOpioid);
-            g.utilCPSP = parseGlobalVal('utilCpsp' + cap, g.utilCPSP);
-            g.costGP = parseGlobalVal('costGP' + cap, g.costGP);
-            g.costSpecialist = parseGlobalVal('costSpecialist' + cap, g.costSpecialist);
-            g.costChronicCare = parseGlobalVal('costChronicCare' + cap, g.costChronicCare);
-            g.costCaregiver = parseGlobalVal('costCaregiver' + cap, g.costCaregiver);
-            g.informalCareCPSP = parseGlobalVal('informalCareCPSP' + cap, g.informalCareCPSP);
-            g.informalCareOpioid = parseGlobalVal('informalCareOpioid' + cap, g.informalCareOpioid);
-            g.informalCareNonOpioid = parseGlobalVal('informalCareNonOpioid' + cap, g.informalCareNonOpioid);
-            g.popAge = parseGlobalVal('popAge' + cap, g.popAge);
-            g.pctMale = parseGlobalVal('pctMale' + cap, g.pctMale);
-            
-            g.oneOffCost = parseGlobalVal('oneOffCost' + cap, 0);
-            g.sessionCost = parseGlobalVal('sessionCost' + cap, 0);
-            g.numSessions = parseGlobalVal('numSessions' + cap, 1);
-            
-            const rCost = parseGlobalVal('roboticsCost' + cap, 0);
-            solverInputs.vrCost += rCost;
-        }
-
-        let ceEfficacy = -1;
-        let csEfficacy = -1;
-
-        // Bisection search/Linear scan from 0% to 100% in steps of 0.05%
-        for (let eff = 0; eff <= 100; eff += 0.05) {
-            let modelParams = {
-                ...g,
-                wtp: solverInputs.wtp,
-                vrCost: solverInputs.vrCost,
-                opioidReduction: eff,
-                cpspRisk: solverInputs.cpspRisk,
-                currency: currentCurrency
-            };
-            
-            const tempModel = new MarkovModel(modelParams);
-            tempModel.baseParams.currency = currentCurrency;
-            const res = tempModel.run();
-
-            if (ceEfficacy === -1 && res.nmb >= 0) {
-                ceEfficacy = eff;
-            }
-            if (csEfficacy === -1 && res.incCost <= 0) {
-                csEfficacy = eff;
-            }
-        }
-
-        solvedCeValue = ceEfficacy;
-        solvedCsValue = csEfficacy;
-
-        // Render values in modal
-        const symb = currentCurrency === 'GBP' ? '£' : '€';
-        modalCeTitle.textContent = `Cost-Effective (at ${symb}${solverInputs.wtp.toLocaleString()})`;
-        modalCeVal.textContent = ceEfficacy !== -1 ? `${ceEfficacy.toFixed(2)}%` : 'Not Achievable';
-        modalCsVal.textContent = csEfficacy !== -1 ? `${csEfficacy.toFixed(2)}%` : 'Not Achievable';
-        
-        applyCeBtn.style.display = ceEfficacy !== -1 ? 'block' : 'none';
-        applyCsBtn.style.display = csEfficacy !== -1 ? 'block' : 'none';
-
-        // Solve for payback years at 100% efficacy if not achievable in 1-year
-        let longTermNote = '';
-        if (ceEfficacy === -1) {
-            let solvedCeYears = -1;
-            for (let y = 1; y <= 20; y++) {
-                let tempParams = { 
-                    ...g, 
-                    wtp: solverInputs.wtp, 
-                    vrCost: solverInputs.vrCost, 
-                    opioidReduction: 100, 
-                    cpspRisk: solverInputs.cpspRisk, 
-                    currency: currentCurrency, 
-                    cycles: y * 12 
-                };
-                const tempModel = new MarkovModel(tempParams);
-                const tempRes = tempModel.run();
-                if (tempRes.nmb >= 0) {
-                    solvedCeYears = y;
-                    break;
-                }
-            }
-            if (solvedCeYears !== -1) {
-                longTermNote = `<br><span style="color:var(--accent-primary);">At 100% efficacy, cost-effectiveness is projected to be achieved in <strong>${solvedCeYears} years</strong>.</span>`;
-            } else {
-                longTermNote = `<br><span style="color:#ef4444;">Even at 100% efficacy, this setup remains not cost-effective over a 20-year horizon.</span>`;
-            }
-        }
-
-        modalNote.innerHTML = `Active Parameters: VR Cost = ${symb}${solverInputs.vrCost.toFixed(2)}, CPSP Risk = ${solverInputs.cpspRisk}%${longTermNote}`;
-        modal.style.display = 'flex';
-    }
-
-    document.getElementById('btnCalcThresholds').addEventListener('click', () => solveThresholds('vr'));
-    document.getElementById('btnCalcThresholdsAdv').addEventListener('click', () => solveThresholds('adv'));
-    document.getElementById('btnCalcThresholdsPlp').addEventListener('click', () => solveThresholds('plp'));
-
-    closeModalBtn.addEventListener('click', () => { modal.style.display = 'none'; });
-    window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
-
-    function applyEfficacy(val) {
-        const id_prefix = solverActivePrefix === 'adv' ? 'Adv' : (solverActivePrefix === 'plp' ? 'Plp' : '');
-        const isPlp = solverActivePrefix === 'plp';
-        const slider = document.getElementById(isPlp ? 'painReductionPlp' : ('opioidReduction' + id_prefix));
-        const number = document.getElementById(isPlp ? 'painReductionNumPlp' : ('opioidReductionNum' + id_prefix));
-        if (slider) slider.value = val;
-        if (number) number.value = val;
-        
-        if (solverActivePrefix === 'vr') {
-            if (typeof window.updateDashboardVr === 'function') window.updateDashboardVr();
-        } else if (solverActivePrefix === 'plp') {
-            if (typeof window.updateDashboardPlp === 'function') window.updateDashboardPlp();
+    // Status: does your current trial data clear the bar?
+    const statusEl = document.getElementById('meCurrent');
+    if (statusEl) {
+        if (!isFinite(eCS)) {
+            statusEl.textContent = '⚠️ No efficacy achieves CS at this price';
+            statusEl.style.color = '#ef4444';
+        } else if (eCurrent >= eCS) {
+            statusEl.innerHTML = `✅ Your efficacy (${eCurrent}%) exceeds CS bar (${fmtEff(eCS)})`;
+            statusEl.style.color = '#10b981';
+        } else if (eCurrent >= eCE25) {
+            statusEl.innerHTML = `✅ Clears CE@£25k bar (${fmtEff(eCE25)}), below CS bar (${fmtEff(eCS)})`;
+            statusEl.style.color = '#38bdf8';
+        } else if (eCurrent >= eCE35) {
+            statusEl.innerHTML = `⚠️ Clears CE@£35k only (bar: ${fmtEff(eCE35)})`;
+            statusEl.style.color = '#f59e0b';
         } else {
-            if (typeof window.updateDashboardAdv === 'function') window.updateDashboardAdv();
+            statusEl.innerHTML = `❌ Current efficacy (${eCurrent}%) is below all bars. Need ≥ ${fmtEff(eCE35)} for CE@£35k`;
+            statusEl.style.color = '#ef4444';
         }
-        modal.style.display = 'none';
     }
 
-    applyCeBtn.addEventListener('click', () => applyEfficacy(solvedCeValue));
-    applyCsBtn.addEventListener('click', () => applyEfficacy(solvedCsValue));
-
-    // NHS threshold shortcut button
-    const btnNhsWtp = document.getElementById('btnNhsWtpAdv');
-    if (btnNhsWtp) {
-        btnNhsWtp.addEventListener('click', () => {
-            const wtpInput = document.getElementById('wtpAdv');
-            if (wtpInput) {
-                const targetGbp = 25000;
-                if (currentCurrency === 'GBP') {
-                    wtpInput.value = targetGbp;
-                } else {
-                    wtpInput.value = Math.round(targetGbp / rate_eur_to_gbp);
-                }
-                wtpInput.dispatchEvent(new Event('input'));
-            }
-        });
+    // Also update the headroom cell colour against current efficacy
+    const hrEl = document.getElementById('meHeadroomBar');
+    if (hrEl && isFinite(eCS)) {
+        const pct = Math.min(100, (eCurrent / eCS) * 100);
+        hrEl.style.width = pct.toFixed(1) + '%';
+        hrEl.style.background = pct >= 100 ? '#10b981' : pct >= 70 ? '#38bdf8' : pct >= 40 ? '#f59e0b' : '#ef4444';
     }
-    const btnNhsWtpPlp = document.getElementById('btnNhsWtpPlp');
-    if (btnNhsWtpPlp) {
-        btnNhsWtpPlp.addEventListener('click', () => {
-            const wtpInput = document.getElementById('wtpPlp');
-            if (wtpInput) {
-                const targetGbp = 25000;
-                if (currentCurrency === 'GBP') {
-                    wtpInput.value = targetGbp;
-                } else {
-                    wtpInput.value = Math.round(targetGbp / rate_eur_to_gbp);
-                }
-                wtpInput.dispatchEvent(new Event('input'));
-            }
-        });
-    }
+}
 
-    // Societal Tab Slider Sync
-    const societalSliders = [
-        { slider: 'cohortSizeSocietal', num: 'cohortSizeSocietalNum' },
-        { slider: 'weeklyEarningsSocietal', num: 'weeklyEarningsSocietalNum' },
-        { slider: 'employmentRateSocietal', num: 'employmentRateSocietalNum' },
-        { slider: 'horizonSocietal', num: 'horizonSocietalNum' }
-    ];
+/* ─── Number formatting ─── */
+const fmt  = n => '£' + (isFinite(n) && !isNaN(n) ? n.toLocaleString('en-GB', {minimumFractionDigits:2, maximumFractionDigits:2}) : '—');
+const fmt0 = n => '£' + (isFinite(n) && !isNaN(n) ? Math.round(n).toLocaleString('en-GB') : '—');
+const fmtN = (n, dp=2) => isFinite(n) && !isNaN(n) ? n.toFixed(dp) : '—';
 
-    societalSliders.forEach(pair => {
-        const sliderEl = document.getElementById(pair.slider);
-        const numEl = document.getElementById(pair.num);
-        if (sliderEl && numEl) {
-            sliderEl.addEventListener('input', (e) => { numEl.value = e.target.value; updateSocietalForecast(); if (typeof updateHtaAnalysis === 'function') updateHtaAnalysis(); });
-            numEl.addEventListener('input', (e) => { sliderEl.value = e.target.value; updateSocietalForecast(); if (typeof updateHtaAnalysis === 'function') updateHtaAnalysis(); });
+/* ─── Safe numeric input reader ─── */
+function vd(id, def) {
+    const el = document.getElementById(id);
+    if (!el) return def;
+    const n = parseFloat(el.value);
+    return isNaN(n) ? def : n;
+}
+
+function vbool(id) {
+    const el = document.getElementById(id);
+    return el ? el.checked : false;
+}
+
+/* ─── Collect all inputs ─── */
+function getInputs() {
+    const csEl = document.getElementById('cohortSize');
+    const cs   = csEl ? parseInt(csEl.value, 10) : 1000;
+    return {
+        wtp:               vd('wtp',            25000),
+        vrCost:            vd('vrCost',          40.55),
+        costOneOff:        vd('costOneOff',       0.00),
+        painReduction:     vd('painReduction',    2.8),
+        cohortSize:        isNaN(cs) ? 1000 : cs,
+        useCTMC:           vbool('useCTMC'),
+        ctmcObsPeriod:     vd('ctmcObsPeriod',   3.45),
+        utilPf:            vd('utilPf',           0.80),
+        utilMild:          vd('utilMild',         0.67),
+        utilMod:           vd('utilMod',          0.46),
+        utilSev:           vd('utilSev',          0.16),
+        costGabapentin:    vd('mc1',              1.60),
+        costPregabalin:    vd('mc2',             10.90),
+        costAmitriptyline: vd('mc3',              0.55),
+        costDuloxetine:    vd('mc4',              3.30),
+        costGpVisit:       vd('mc5',             97.50),
+        costSpecialist:    vd('mc6',            133.00),
+        travelCostKm:      vd('nmc1',             0.35),
+        travelDistanceKm:  vd('nmc2',             4.8),
+        parkingCost:       vd('nmc3',             3.50),
+        costCaregiverRate: vd('nmc4',            12.71),
+        durMild:           vd('nmc5',             0.5),
+        durMod:            vd('nmc6',             7.5),
+        durSev:            vd('nmc7',            17.0),
+        durConst:          vd('nmc8',            24.0),
+    };
+}
+
+/* ─── Debounce helper for auto-refresh ─── */
+let _debounceTimer = null;
+function scheduleRefresh() {
+    clearTimeout(_debounceTimer);
+    _debounceTimer = setTimeout(recalculateAll, 600);
+}
+
+/* ─── Wire auto-refresh to all dashboard inputs ─── */
+function wireAutoRefresh() {
+    const ids = ['wtp','vrCost','costOneOff','painReduction','cohortSize',
+                 'utilPf','utilMild','utilMod','utilSev',
+                 'axCeXmin','axCeXmax','axCeYmin','axCeYmax','axHrYmax',
+                 'useCTMC','ctmcObsPeriod'];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input',  scheduleRefresh);
+            el.addEventListener('change', scheduleRefresh);
         }
     });
+}
 
+/* ─── Main Recalculate ─── */
+function recalculateAll() {
+    const statusEl = document.getElementById('statusText');
+    if (statusEl) statusEl.textContent = 'Calculating…';
 
+    // Use setTimeout so browser can repaint status first
+    setTimeout(() => {
+        try {
+            const inputs = getInputs();
+            const model  = new PLPMarkovModel(inputs);
+            const res    = model.run();
 
-    function updateSocietalForecast() {
-        const suffix = lastActiveDashboard === 'plp' ? 'Plp' : 'Adv';
-        const isPlp = lastActiveDashboard === 'plp';
+            window._lastRes    = res;
+            window._lastInputs = inputs;
+            window._lastModel  = model;
 
-        // Read active tab parameter states as the base for analysis
-        const wtpInput = document.getElementById('wtp' + suffix);
-        const wtp = wtpInput ? parseFloat(wtpInput.value) : 20000;
-        const vrCostInput = document.getElementById('vrCost' + suffix);
-        let vrCost = vrCostInput ? parseFloat(vrCostInput.value) : 40.55;
-        const opioidReductionInput = document.getElementById(isPlp ? 'painReductionPlp' : 'opioidReductionAdv');
-        const opioidReduction = opioidReductionInput ? parseFloat(opioidReductionInput.value) : 2.8;
-        const cpspRiskInput = document.getElementById(isPlp ? 'plpRiskPlp' : 'cpspRiskAdv');
-        const cpspRisk = cpspRiskInput ? parseFloat(cpspRiskInput.value) : 15;
+            updateKpis(res, inputs);
+            updateBadges(res, inputs);
+            updateMinEfficacyDisplay(inputs);   // ← reverse solver: price → min efficacy
+            updateCePlane(res, inputs);
+            updateCohortTrace(res);
+            updateHeadroom(res, inputs);
+            updateTornado(res);
+            updateHtaDisplay(res, inputs);
+            updateCtmcPanel(model);
 
-        // Fetch societal input modifiers
-        const cohortSize = parseFloat(document.getElementById('cohortSizeSocietalNum').value) || 10000;
-        const weeklyEarnings = parseFloat(document.getElementById('weeklyEarningsSocietalNum').value) || 650;
-        const employmentRate = (parseFloat(document.getElementById('employmentRateSocietalNum').value) || 60) / 100;
-        const horizonYears = parseFloat(document.getElementById('horizonSocietalNum').value) || 5;
-
-        // Fetch global baseline values
-        let g = {
-            utilPainFree: parseGlobalVal('utilPfGlobal', 1.0),
-            utilNonOpioid: parseGlobalVal('utilNonOpGlobal', 0.93),
-            utilOpioid: parseGlobalVal('utilOpioidGlobal', 0.61),
-            utilCPSP: parseGlobalVal('utilCpspGlobal', 0.59),
-            costGP: parseGlobalVal('costGPGlobal', 32.04),
-            costSpecialist: parseGlobalVal('costSpecialistGlobal', 225.00),
-            costChronicCare: parseGlobalVal('costChronicCareGlobal', 119.51),
-            costCaregiver: parseGlobalVal('costCaregiverGlobal', 19.51),
-            informalCareCPSP: parseGlobalVal('informalCareCPSPGlobal', 20),
-            informalCareOpioid: parseGlobalVal('informalCareOpioidGlobal', 20),
-            informalCareNonOpioid: parseGlobalVal('informalCareNonOpioidGlobal', 8),
-            popAge: parseGlobalVal('popAgeGlobal', 65),
-            pctMale: parseGlobalVal('pctMaleGlobal', 0.50),
-            drugCostOpioidStable: parseGlobalVal('drugCostOpioidStableGlobal', 0.35),
-            drugCostOpioidDecrease: parseGlobalVal('drugCostOpioidDecreaseGlobal', 0.24),
-            drugCostParacetamol: parseGlobalVal('drugCostParacetamolGlobal', 0.03),
-            travelCostKm: parseGlobalVal('travelCostKmGlobal', 0.26),
-            travelDistance: parseGlobalVal('travelDistanceGlobal', 7.1),
-            parkingCost: parseGlobalVal('parkingCostGlobal', 3.92),
-            transPfNonOp_m1: parseGlobalVal('transPfNonOp_m1Global', 0.1176),
-            transPfNonOp_m2: parseGlobalVal('transPfNonOp_m2Global', 0.0000),
-            transPfNonOp_m3: parseGlobalVal('transPfNonOp_m3Global', 0.0000),
-            transPfNonOp_m4_12: parseGlobalVal('transPfNonOp_m4_12Global', 0.0000),
-            transNonOpPF_m1: parseGlobalVal('transNonOpPF_m1Global', 0.0000),
-            transNonOpPF_m2: parseGlobalVal('transNonOpPF_m2Global', 1.0000),
-            transNonOpPF_m3: parseGlobalVal('transNonOpPF_m3Global', 0.7297),
-            transNonOpPF_m4_12: parseGlobalVal('transNonOpPF_m4_12Global', 0.0000),
-            transNonOpOp_m1: parseGlobalVal('transNonOpOp_m1Global', 0.1299),
-            transNonOpOp_m2: parseGlobalVal('transNonOpOp_m2Global', 0.0000),
-            transNonOpOp_m3: parseGlobalVal('transNonOpOp_m3Global', 0.0000),
-            transNonOpOp_m4_12: parseGlobalVal('transNonOpOp_m4_12Global', 0.0000),
-            transOpioidPF_m1: parseGlobalVal('transOpioidPF_m1Global', 0.0000),
-            transOpioidPF_m2: parseGlobalVal('transOpioidPF_m2Global', 0.4841),
-            transOpioidPF_m3: parseGlobalVal('transOpioidPF_m3Global', 0.0000),
-            transOpioidPF_m4_12: parseGlobalVal('transOpioidPF_m4_12Global', 0.0000),
-            transOpioidNonOp_m1: parseGlobalVal('transOpioidNonOp_m1Global', 0.0000),
-            transOpioidNonOp_m2: parseGlobalVal('transOpioidNonOp_m2Global', 0.2937),
-            transOpioidNonOp_m3: parseGlobalVal('transOpioidNonOp_m3Global', 0.4643),
-            transOpioidNonOp_m4_12: parseGlobalVal('transOpioidNonOp_m4_12Global', 0.0000),
-            transNonOpCpsp_m1: parseGlobalVal('transNonOpCpsp_m1Global', 0.0000),
-            transNonOpCpsp_m2: parseGlobalVal('transNonOpCpsp_m2Global', 0.0000),
-            transNonOpCpsp_m3: parseGlobalVal('transNonOpCpsp_m3Global', 0.0000),
-            transNonOpCpsp_m4_12: parseGlobalVal('transNonOpCpsp_m4_12Global', 1.0000),
-            transOpioidCpsp_m1: parseGlobalVal('transOpioidCpsp_m1Global', 0.0000),
-            transOpioidCpsp_m2: parseGlobalVal('transOpioidCpsp_m2Global', 0.0000),
-            transOpioidCpsp_m3: parseGlobalVal('transOpioidCpsp_m3Global', 0.0000),
-            transOpioidCpsp_m4_12: parseGlobalVal('transOpioidCpsp_m4_12Global', 1.0000),
-            transCpspPF_m1: parseGlobalVal('transCpspPF_m1Global', 0.0000),
-            transCpspPF_m2: parseGlobalVal('transCpspPF_m2Global', 0.0000),
-            transCpspPF_m3: parseGlobalVal('transCpspPF_m3Global', 0.0000),
-            transCpspPF_m4_12: parseGlobalVal('transCpspPF_m4_12Global', 0.0286),
-            deathRisk_m1: parseGlobalVal('deathRisk_m1Global', 0.0005),
-            deathRisk_m2: parseGlobalVal('deathRisk_m2Global', 0.0005),
-            deathRisk_m3: parseGlobalVal('deathRisk_m3Global', 0.0005),
-            deathRisk_m4_12: parseGlobalVal('deathRisk_m4_12Global', 0.0005),
-            gpPF_m1: parseGlobalVal('gpPF_m1Global', 0.03),
-            gpPF_m2: parseGlobalVal('gpPF_m2Global', 0.01),
-            gpPF_m3: parseGlobalVal('gpPF_m3Global', 0.02),
-            gpPF_m4_12: parseGlobalVal('gpPF_m4_12Global', 0.01),
-            gpNonOp_m1: parseGlobalVal('gpNonOp_m1Global', 0.11),
-            gpNonOp_m2: parseGlobalVal('gpNonOp_m2Global', 0.14),
-            gpNonOp_m3: parseGlobalVal('gpNonOp_m3Global', 0.30),
-            gpNonOp_m4_12: parseGlobalVal('gpNonOp_m4_12Global', 0.00),
-            gpOp_m1: parseGlobalVal('gpOp_m1Global', 0.23),
-            gpOp_m2: parseGlobalVal('gpOp_m2Global', 0.50),
-            gpOp_m3: parseGlobalVal('gpOp_m3Global', 0.60),
-            gpOp_m4_12: parseGlobalVal('gpOp_m4_12Global', 0.00),
-            gpCpsp_m1: parseGlobalVal('gpCpsp_m1Global', 0.00),
-            gpCpsp_m2: parseGlobalVal('gpCpsp_m2Global', 0.00),
-            gpCpsp_m3: parseGlobalVal('gpCpsp_m3Global', 0.00),
-            gpCpsp: parseGlobalVal('gpCpspGlobal', 0.61),
-            specNonOp_m1: parseGlobalVal('specNonOp_m1Global', 0.10),
-            specNonOp_m2: parseGlobalVal('specNonOp_m2Global', 0.10),
-            specNonOp_m3: parseGlobalVal('specNonOp_m3Global', 0.10),
-            specNonOp_m4_12: parseGlobalVal('specNonOp_m4_12Global', 0.00),
-            specOp_m1: parseGlobalVal('specOp_m1Global', 0.20),
-            specOp_m2: parseGlobalVal('specOp_m2Global', 0.20),
-            specOp_m3: parseGlobalVal('specOp_m3Global', 0.20),
-            specOp_m4_12: parseGlobalVal('specOp_m4_12Global', 0.00),
-            specCpsp_m1: parseGlobalVal('specCpsp_m1Global', 0.00),
-            specCpsp_m2: parseGlobalVal('specCpsp_m2Global', 0.00),
-            specCpsp_m3: parseGlobalVal('specCpsp_m3Global', 0.00),
-            specCpsp: parseGlobalVal('specCpspGlobal', 0.30)
-        };
-
-        // Apply overrides from Sandbox sidebar
-        g.utilPainFree = parseGlobalVal('utilPf' + suffix, g.utilPainFree);
-        g.utilNonOpioid = parseGlobalVal('utilNonOp' + suffix, g.utilNonOpioid);
-        g.utilOpioid = parseGlobalVal('utilOpioid' + suffix, g.utilOpioid);
-        g.utilCPSP = parseGlobalVal('utilCpsp' + suffix, g.utilCPSP);
-        g.costGP = parseGlobalVal('costGP' + suffix, g.costGP);
-        g.costSpecialist = parseGlobalVal('costSpecialist' + suffix, g.costSpecialist);
-        g.costChronicCare = parseGlobalVal('costChronicCare' + suffix, g.costChronicCare);
-        g.costCaregiver = parseGlobalVal('costCaregiver' + suffix, g.costCaregiver);
-        g.informalCareCPSP = parseGlobalVal('informalCareCPSP' + suffix, g.informalCareCPSP);
-        g.informalCareOpioid = parseGlobalVal('informalCareOpioid' + suffix, g.informalCareOpioid);
-        g.informalCareNonOpioid = parseGlobalVal('informalCareNonOpioid' + suffix, g.informalCareNonOpioid);
-        g.popAge = parseGlobalVal('popAge' + suffix, g.popAge);
-        g.pctMale = parseGlobalVal('pctMale' + suffix, g.pctMale);
-        g.oneOffCost = parseGlobalVal('oneOffCost' + suffix, 0);
-        g.sessionCost = parseGlobalVal('sessionCost' + suffix, 0);
-        g.numSessions = parseGlobalVal('numSessions' + suffix, 1);
-
-        const rCost = parseGlobalVal('roboticsCost' + suffix, 0);
-        vrCost += rCost;
-
-        // Perform multi-year projection loops
-        const yearsSavings = [];
-        const yearsProductivity = [];
-        const labels = [];
-
-        let cumulativeHealthSavings = 0;
-        let cumulativeProdSavings = 0;
-
-        let annualHealthSavings = 0;
-        let annualProdSavings = 0;
-        let annualQalyGained = 0;
-
-        let annualCpspPrevented = 0;
-        let annualGpAvoided = 0;
-        let annualSpecAvoided = 0;
-        let annualOpioidMonthsSaved = 0;
-        
-        let annualAbsenteeismSaved = 0;
-        let annualCaregiverHoursSaved = 0;
-        
-        // Sim variables
-        let modelParams = {
-            ...g,
-            wtp: wtp,
-            vrCost: vrCost,
-            opioidReduction: opioidReduction,
-            cpspRisk: cpspRisk,
-            currency: currentCurrency
-        };
-
-        // 1. Run Year 1 (12 cycles) to populate annual metrics
-        const m1Yr = new MarkovModel({ ...modelParams, cycles: 12 });
-        const r1Yr = m1Yr.run();
-
-        // Calculate medical reductions
-        const scHist = r1Yr.sc.cohortHistory;
-        const vrHist = r1Yr.vr.cohortHistory;
-        
-        // Sum GP visits
-        let scGp = 0, vrGp = 0, scSpec = 0, vrSpec = 0, scOpMonths = 0, vrOpMonths = 0;
-        let scCaregiverHrs = 0, vrCaregiverHrs = 0;
-
-        for (let i = 0; i < 12; i++) {
-            // SC GP visits
-            scGp += scHist[i][0] * (i===0?g.gpPF_m1:(i===1?g.gpPF_m2:(i===2?g.gpPF_m3:g.gpPF_m4_12))) +
-                    scHist[i][1] * (i===0?g.gpNonOp_m1:(i===1?g.gpNonOp_m2:(i===2?g.gpNonOp_m3:g.gpNonOp_m4_12))) +
-                    scHist[i][2] * (i===0?g.gpOp_m1:(i===1?g.gpOp_m2:(i===2?g.gpOp_m3:g.gpOp_m4_12))) +
-                    scHist[i][3] * (i===0?g.gpCpsp_m1:(i===1?g.gpCpsp_m2:(i===2?g.gpCpsp_m3:g.gpCpsp)));
-
-            // VR GP visits
-            vrGp += vrHist[i][0] * (i===0?g.gpPF_m1:(i===1?g.gpPF_m2:(i===2?g.gpPF_m3:g.gpPF_m4_12))) +
-                    vrHist[i][1] * (i===0?g.gpNonOp_m1:(i===1?g.gpNonOp_m2:(i===2?g.gpNonOp_m3:g.gpNonOp_m4_12))) +
-                    vrHist[i][2] * (i===0?g.gpOp_m1:(i===1?g.gpOp_m2:(i===2?g.gpOp_m3:g.gpOp_m4_12))) +
-                    vrHist[i][3] * (i===0?g.gpCpsp_m1:(i===1?g.gpCpsp_m2:(i===2?g.gpCpsp_m3:g.gpCpsp)));
-
-            // SC specialist
-            scSpec += scHist[i][1] * (i===0?g.specNonOp_m1:(i===1?g.specNonOp_m2:(i===2?g.specNonOp_m3:g.specNonOp_m4_12))) +
-                      scHist[i][2] * (i===0?g.specOp_m1:(i===1?g.specOp_m2:(i===2?g.specOp_m3:g.specOp_m4_12))) +
-                      scHist[i][3] * (i===0?g.specCpsp_m1:(i===1?g.specCpsp_m2:(i===2?g.specCpsp_m3:g.specCpsp)));
-
-            // VR specialist
-            vrSpec += vrHist[i][1] * (i===0?g.specNonOp_m1:(i===1?g.specNonOp_m2:(i===2?g.specNonOp_m3:g.specNonOp_m4_12))) +
-                      vrHist[i][2] * (i===0?g.specOp_m1:(i===1?g.specOp_m2:(i===2?g.specOp_m3:g.specOp_m4_12))) +
-                      vrHist[i][3] * (i===0?g.specCpsp_m1:(i===1?g.specCpsp_m2:(i===2?g.specCpsp_m3:g.specCpsp)));
-
-            scOpMonths += scHist[i][2];
-            vrOpMonths += vrHist[i][2];
-
-            // Caregiver hours
-            scCaregiverHrs += scHist[i][1]*g.informalCareNonOpioid + scHist[i][2]*g.informalCareOpioid + scHist[i][3]*g.informalCareCPSP;
-            vrCaregiverHrs += vrHist[i][1]*g.informalCareNonOpioid + vrHist[i][2]*g.informalCareOpioid + vrHist[i][3]*g.informalCareCPSP;
+            if (statusEl) statusEl.textContent = '✓ Updated ' + new Date().toLocaleTimeString('en-GB');
+        } catch(err) {
+            console.error(err);
+            if (statusEl) statusEl.textContent = '⚠ Error: ' + err.message;
         }
+    }, 10);
+}
 
-        annualGpAvoided = Math.round((scGp - vrGp) * cohortSize);
-        annualSpecAvoided = Math.round((scSpec - vrSpec) * cohortSize);
-        annualOpioidMonthsSaved = Math.round((scOpMonths - vrOpMonths) * cohortSize);
-        annualCpspPrevented = Math.round((scHist[11][3] - vrHist[11][3]) * cohortSize);
+/* ─── KPI Updates ─── */
+function updateKpis(res, inputs) {
+    setText('kpiIncCost', fmt(res.incCost));
+    setText('kpiIncQaly', fmtN(res.incQaly, 4));
+    colorEl('kpiNmb', res.nmb >= 0 ? 'var(--success)' : 'var(--danger)');
+    setText('kpiNmb', fmt(res.nmb));
 
-        // Productivity model:
-        let productivityLossSC = 0, productivityLossVR = 0;
-        for (let i = 0; i < 12; i++) {
-            productivityLossSC += scHist[i][1] * 0.20 + scHist[i][2] * 0.50 + scHist[i][3] * 0.80;
-            productivityLossVR += vrHist[i][1] * 0.20 + vrHist[i][2] * 0.50 + vrHist[i][3] * 0.80;
-        }
-        
-        annualAbsenteeismSaved = Math.round((productivityLossSC - productivityLossVR) * 4.33 * cohortSize * employmentRate);
-        annualProdSavings = annualAbsenteeismSaved * weeklyEarnings;
+    if (res.incCost < 0 && res.incQaly > 0) {
+        // Dominant: show the actual ratio value so it has scientific meaning
+        const savingPerQaly = Math.abs(res.incCost / res.incQaly);
+        setText('kpiIcer', `🌟 £${Math.round(savingPerQaly).toLocaleString('en-GB')}/QALY saved`);
+        setText('kpiIcerSub', 'Dominant — cost-saving AND more QALYs');
+        colorEl('kpiIcer', 'var(--accent-purple)');
+    } else if (!isFinite(res.icer) || res.incQaly <= 0) {
+        setText('kpiIcer', 'Dominated');
+        setText('kpiIcerSub', 'Less effective than usual care (ΔE ≤ 0)');
+        colorEl('kpiIcer', 'var(--danger)');
+    } else {
+        setText('kpiIcer', fmt0(res.icer) + '/QALY');
+        const ce = res.icer <= inputs.wtp;
+        setText('kpiIcerSub', ce ? '✅ Cost-effective @ WTP' : '⚠️ Above WTP threshold');
+        colorEl('kpiIcer', ce ? 'var(--success)' : 'var(--warning)');
+    }
+}
 
-        // Caregiver respite
-        annualCaregiverHoursSaved = Math.round((scCaregiverHrs - vrCaregiverHrs) * cohortSize);
-        
-        // Direct healthcare savings
-        annualHealthSavings = (r1Yr.sc.totalCosts - r1Yr.vr.totalCosts) * cohortSize;
-        annualQalyGained = r1Yr.incQaly * cohortSize * 0.5231;
+/* ─── Badge Row (legacy compat) + Live Threshold Panel ─── */
+function updateBadges(res, inputs) {
+    // Legacy badge fields (hidden but kept for other code that may reference them)
+    setText('badgeCsSavVal', fmt0(res.costSavingThreshold));
+    setText('badgeCeEffVal', fmt0(res.costEffectiveThreshold));
 
-        // 2. Perform year-by-year projections for charts
-        let rateVal = currentCurrency === 'GBP' ? 0.854 : 1.0;
-        for (let y = 1; y <= horizonYears; y++) {
-            const tempM = new MarkovModel({ ...modelParams, cycles: y * 12 });
-            const tempR = tempM.run();
-            
-            // Health system savings
-            let totalH = (tempR.sc.totalCosts - tempR.vr.totalCosts) * cohortSize;
-            yearsSavings.push(totalH);
+    const el   = document.getElementById('badgeStatus');
+    const icon = document.getElementById('badgeStatusIcon');
+    const val  = document.getElementById('badgeStatusVal');
+    if (res.incCost < 0 && res.incQaly > 0) {
+        setClass(el, 'badge-card badge-dominant');
+        if (icon) icon.textContent = '🌟';
+        if (val)  { val.textContent = 'Dominant'; val.style.color = 'var(--accent-purple)'; }
+    } else if (isFinite(res.icer) && res.icer <= inputs.wtp && res.incQaly > 0) {
+        setClass(el, 'badge-card badge-eff');
+        if (icon) icon.textContent = '✅';
+        if (val)  { val.textContent = 'Cost-Effective'; val.style.color = 'var(--success)'; }
+    } else if (res.incQaly <= 0) {
+        setClass(el, 'badge-card badge-danger');
+        if (icon) icon.textContent = '❌';
+        if (val)  { val.textContent = 'Dominated'; val.style.color = 'var(--danger)'; }
+    } else {
+        setClass(el, 'badge-card');
+        if (icon) icon.textContent = '⚠️';
+        if (val)  { val.textContent = 'Above WTP'; val.style.color = 'var(--warning)'; }
+    }
 
-            // Add productivity savings
-            let scProd = 0, vrProd = 0;
-            let tempScH = tempR.sc.cohortHistory;
-            let tempVrH = tempR.vr.cohortHistory;
-            for (let i = 0; i < y * 12; i++) {
-                let hIdx = Math.min(i, tempScH.length - 1);
-                scProd += tempScH[hIdx][1] * 0.20 + tempScH[hIdx][2] * 0.50 + tempScH[hIdx][3] * 0.80;
-                vrProd += tempVrH[hIdx][1] * 0.20 + tempVrH[hIdx][2] * 0.50 + tempVrH[hIdx][3] * 0.80;
-            }
-            let totalProd = (scProd - vrProd) * 4.33 * cohortSize * employmentRate * weeklyEarnings;
-            yearsProductivity.push(totalH + totalProd);
+    // ── Live Threshold Panel ──
+    const cs   = res.costSavingThreshold;
+    const ce25 = res.costEffectiveThreshold25 !== undefined ? res.costEffectiveThreshold25 : res.costEffectiveThreshold;
+    const ce35 = res.costEffectiveThreshold35 !== undefined ? res.costEffectiveThreshold35 : (res.costEffectiveThreshold + (35000-25000)*(res.incQaly));
+    const cur  = inputs.vrCost + inputs.costOneOff;
+    const headroom = cs - cur;
+    const savings  = cs;   // cs ceiling = downstream savings when device cost = 0
+    const dq       = res.incQaly; // note: incQaly computed at current price — but savings = cs is device-independent
 
-            labels.push(`Year ${y}`);
-        }
+    const fmtTh  = n => (isFinite(n) && !isNaN(n)) ? '£' + n.toFixed(2) : '—';
+    const fmtTh0 = n => (isFinite(n) && !isNaN(n)) ? '£' + Math.round(n).toLocaleString('en-GB') : '—';
 
-        // Final Horizon values
-        cumulativeHealthSavings = yearsSavings[horizonYears - 1];
-        cumulativeProdSavings = yearsProductivity[horizonYears - 1] - cumulativeHealthSavings;
-        let totalNetSocietalVal = cumulativeHealthSavings + cumulativeProdSavings + (annualQalyGained * horizonYears * wtp);
+    setText('thCS',         fmtTh(cs));
+    setText('thCE25',       fmtTh(ce25));
+    setText('thCE35',       fmtTh(ce35));
+    setText('thCurrent',    fmtTh(cur));
+    setText('thHeadroom',   headroom >= 0 ? '+' + fmtTh(headroom) : fmtTh(headroom));
+    setText('thSavingsVal', fmtTh(savings));
+    setText('thDeltaQVal',  isFinite(dq) ? dq.toFixed(6) : '—');
 
-        // Update KPIs
-        const symb = currentCurrency === 'GBP' ? '£' : '€';
-        document.getElementById('kpiSocHealthSavings').textContent = `${symb}${Math.round(cumulativeHealthSavings).toLocaleString()}`;
-        document.getElementById('kpiSocProdSavings').textContent = `${symb}${Math.round(cumulativeProdSavings).toLocaleString()}`;
-        document.getElementById('kpiSocNetValue').textContent = `${symb}${Math.round(totalNetSocietalVal).toLocaleString()}`;
-        document.getElementById('kpiSocQalyGained').textContent = (annualQalyGained * horizonYears).toFixed(2);
-
-        // Update table indicators
-        document.getElementById('socCpspPrevented').textContent = `${annualCpspPrevented.toLocaleString()} cases`;
-        document.getElementById('socGpAvoided').textContent = `${annualGpAvoided.toLocaleString()} visits`;
-        document.getElementById('socSpecAvoided').textContent = `${annualSpecAvoided.toLocaleString()} visits`;
-        document.getElementById('socOpioidMonthsSaved').textContent = `${annualOpioidMonthsSaved.toLocaleString()} months`;
-        
-        document.getElementById('socAbsenteeismSaved').textContent = `${annualAbsenteeismSaved.toLocaleString()} weeks`;
-        document.getElementById('socCaregiverHoursSaved').textContent = `${annualCaregiverHoursSaved.toLocaleString()} hours`;
-        document.getElementById('socCaregiverCostSaved').textContent = `${symb}${Math.round(annualCaregiverHoursSaved * g.costCaregiver * rateVal).toLocaleString()}`;
-        
-        let perPatSavingsVal = (totalNetSocietalVal / cohortSize);
-        document.getElementById('socPerPatientSavings').textContent = `${symb}${Math.round(perPatSavingsVal).toLocaleString()}`;
-
-        // Toggle badge state
-        const badge = document.getElementById('societalRoiStatus');
-        if (cumulativeHealthSavings >= 0) {
-            badge.textContent = 'HEALTHCARE PAYBACK';
-            badge.style.color = '#10b981';
-            badge.style.borderColor = '#10b981';
-            badge.style.background = 'rgba(16,185,129,0.1)';
-        } else if (totalNetSocietalVal >= 0) {
-            badge.textContent = 'SOCIETAL PAYBACK';
-            badge.style.color = '#a855f7';
-            badge.style.borderColor = '#a855f7';
-            badge.style.background = 'rgba(168,85,247,0.1)';
+    // ICER display
+    const icerEl = document.getElementById('thIcerVal');
+    if (icerEl) {
+        if (res.incCost < 0 && res.incQaly > 0) {
+            icerEl.textContent = `Dominant (saves ${fmtTh(Math.abs(res.icer))}/QALY)`;
+            icerEl.style.color = '#a855f7';
+        } else if (!isFinite(res.icer) || res.incQaly <= 0) {
+            icerEl.textContent = 'N/A (ΔE ≤ 0)';
+            icerEl.style.color = '#ef4444';
         } else {
-            badge.textContent = 'NET DEFICIT';
-            badge.style.color = '#ef4444';
-            badge.style.borderColor = '#ef4444';
-            badge.style.background = 'rgba(239,68,68,0.1)';
+            icerEl.textContent = fmtTh0(res.icer) + '/QALY';
+            icerEl.style.color = res.icer <= 25000 ? '#10b981' : res.icer <= 35000 ? '#f59e0b' : '#ef4444';
         }
+    }
 
-        // Render ROI timeline chart
-        const ctx = document.getElementById('societalRoiChart').getContext('2d');
-        if (societalChartInstance) {
-            societalChartInstance.destroy();
+    // Headroom colour
+    const hrEl = document.getElementById('thHeadroom');
+    if (hrEl) hrEl.style.color = headroom > 100 ? '#10b981' : headroom > 0 ? '#f59e0b' : '#ef4444';
+
+    // Current status badge inside the tile
+    const csEl = document.getElementById('thCurrentStatus');
+    if (csEl) {
+        if (cur <= cs)   { csEl.textContent = '✅ Cost-Saving';   csEl.style.color = '#10b981'; }
+        else if (cur <= ce25) { csEl.textContent = '✅ CE @ £25k'; csEl.style.color = '#38bdf8'; }
+        else if (cur <= ce35) { csEl.textContent = '⚠️ CE @ £35k'; csEl.style.color = '#f59e0b'; }
+        else              { csEl.textContent = '❌ Not CE';        csEl.style.color = '#ef4444'; }
+    }
+
+    // Verdict pill
+    const vEl = document.getElementById('thresholdVerdict');
+    if (vEl) {
+        if (res.incCost < 0 && res.incQaly > 0) {
+            vEl.textContent = '🌟 Dominant — saves money & improves outcomes';
+            vEl.style.background = 'rgba(168,85,247,.12)'; vEl.style.color = '#a855f7'; vEl.style.borderColor = 'rgba(168,85,247,.35)';
+        } else if (cur <= cs) {
+            vEl.textContent = '✅ Cost-Saving at current price';
+            vEl.style.background = 'rgba(16,185,129,.12)'; vEl.style.color = '#10b981'; vEl.style.borderColor = 'rgba(16,185,129,.35)';
+        } else if (cur <= ce25) {
+            vEl.textContent = '✅ Cost-Effective @ £25k WTP';
+            vEl.style.background = 'rgba(56,189,248,.12)'; vEl.style.color = '#38bdf8'; vEl.style.borderColor = 'rgba(56,189,248,.35)';
+        } else if (cur <= ce35) {
+            vEl.textContent = '⚠️ CE @ £35k band only';
+            vEl.style.background = 'rgba(245,158,11,.1)'; vEl.style.color = '#f59e0b'; vEl.style.borderColor = 'rgba(245,158,11,.3)';
+        } else {
+            vEl.textContent = '❌ Exceeds CE thresholds';
+            vEl.style.background = 'rgba(239,68,68,.08)'; vEl.style.color = '#ef4444'; vEl.style.borderColor = 'rgba(239,68,68,.25)';
         }
+    }
 
-        societalChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Healthcare Payer Savings',
-                        data: yearsSavings,
-                        borderColor: '#38bdf8',
-                        backgroundColor: 'rgba(56, 189, 248, 0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        borderWidth: 2
-                    },
-                    {
-                        label: 'Full Societal Economic Benefit',
-                        data: yearsProductivity,
-                        borderColor: '#a855f7',
-                        backgroundColor: 'rgba(168, 85, 247, 0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        borderWidth: 2
-                    }
-                ]
+    // Validation strip — human-readable algebraic confirmation
+    const stripEl = document.getElementById('thValidationStrip');
+    if (stripEl) {
+        const nmb25 = isFinite(dq) ? (dq * 25000 - res.incCost).toFixed(2) : '—';
+        const nmb35 = isFinite(dq) ? (dq * 35000 - res.incCost).toFixed(2) : '—';
+        stripEl.innerHTML =
+            `<strong style="color:#10b981;">Verified:</strong>&nbsp;&nbsp;` +
+            `CS ceiling = savings = <strong>${fmtTh(cs)}</strong>&nbsp;|&nbsp;` +
+            `CE25 = savings + 25,000 × ${isFinite(dq)?dq.toFixed(6):'—'} = <strong>${fmtTh(ce25)}</strong>&nbsp;|&nbsp;` +
+            `CE35 = savings + 35,000 × ${isFinite(dq)?dq.toFixed(6):'—'} = <strong>${fmtTh(ce35)}</strong>&nbsp;|&nbsp;` +
+            `NMB@£25k = <strong style="color:${parseFloat(nmb25)>=0?'#10b981':'#ef4444'}">${parseFloat(nmb25)>=0?'+':''}£${Math.abs(parseFloat(nmb25)).toFixed(2)}</strong>&nbsp;|&nbsp;` +
+            `NMB@£35k = <strong style="color:${parseFloat(nmb35)>=0?'#10b981':'#ef4444'}">${parseFloat(nmb35)>=0?'+':''}£${Math.abs(parseFloat(nmb35)).toFixed(2)}</strong>`;
+    }
+}
+
+/* ─── CE Plane ─── */
+function updateCePlane(res, inputs) {
+    destroyChart('ce');
+    const canvas = document.getElementById('cePlaneChart');
+    if (!canvas) return;
+
+    const xMin = vd('axCeXmin', -0.05);
+    const xMax = vd('axCeXmax',  0.10);
+    const yMin = vd('axCeYmin', -200);
+    const yMax = vd('axCeYmax',  200);
+
+    const wtpLine = [{ x: xMin, y: xMin * inputs.wtp }, { x: xMax, y: xMax * inputs.wtp }];
+
+    _charts['ce'] = new Chart(canvas.getContext('2d'), {
+        type: 'scatter',
+        data: {
+            datasets: [
+                {
+                    label: 'PSA Iterations (N=200)',
+                    data:  res.psa,
+                    backgroundColor: 'rgba(56,189,248,0.30)',
+                    pointRadius: 3.5,
+                    order: 3
+                },
+                {
+                    label: 'Base Case',
+                    data:  [{ x: res.incQaly, y: res.incCost }],
+                    backgroundColor: res.nmb >= 0 ? '#10b981' : '#ef4444',
+                    pointStyle: 'rectRot',
+                    pointRadius: 13,
+                    order: 1
+                },
+                {
+                    label: `WTP Line (£${inputs.wtp.toLocaleString('en-GB')}/QALY)`,
+                    data:  wtpLine,
+                    type: 'line',
+                    borderColor: 'rgba(245,158,11,0.7)',
+                    borderDash: [6, 4],
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    fill: false,
+                    order: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position:'bottom', labels:{ color:'#94a3b8', boxWidth:12, font:{size:11} } },
+                tooltip: { callbacks: { label: c => `ΔE=${fmtN(c.parsed.x,4)}, ΔC=${fmt(c.parsed.y)}` } }
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: {
-                            color: '#cbd5e1',
-                            font: { size: 10 }
-                        }
-                    }
+            scales: {
+                x: { min: xMin, max: xMax,
+                    title:{ display:true, text:'Incremental QALYs (ΔE)', color:'#94a3b8' },
+                    ticks:{ color:'#94a3b8' }, grid:{ color:'rgba(255,255,255,0.05)' } },
+                y: { min: yMin, max: yMax,
+                    title:{ display:true, text:'Incremental Cost (ΔC) [£]', color:'#94a3b8' },
+                    ticks:{ color:'#94a3b8', callback: v => '£'+v }, grid:{ color:'rgba(255,255,255,0.05)' } }
+            }
+        }
+    });
+    // Auto-resize: PSA scatter — 200 points, comfortable square-ish
+    autoResizeChart('wrap-cePlaneChart', 'scatter', res.psa ? res.psa.length : 200, 280, 380);
+    if (_charts['ce']) _charts['ce'].resize();
+}
+
+
+function updateCohortTrace(res) {
+    destroyChart('trace');
+    const canvas = document.getElementById('cohortTraceChart');
+    if (!canvas) return;
+
+    const labels = Array.from({length:12},(_,i) => 'M'+(i+1));
+    const cols   = ['#38bdf8','#10b981','#f59e0b','#ef4444','#64748b'];
+    const names  = ['Pain Free','Mild PLP','Moderate PLP','Severe PLP','Death'];
+
+    _charts['trace'] = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                ...names.map((name,i) => ({
+                    label: name + ' (VR)', data: res.vr.cohortHistory.map(h => +(h[i]*100).toFixed(2)),
+                    borderColor: cols[i], backgroundColor:'transparent', fill:false,
+                    tension:0.3, pointRadius:3, borderWidth:2
+                })),
+                ...names.map((name,i) => ({
+                    label: name + ' (UC)', data: res.sc.cohortHistory.map(h => +(h[i]*100).toFixed(2)),
+                    borderColor: cols[i], backgroundColor:'transparent', fill:false,
+                    tension:0.3, pointRadius:2, borderWidth:1.5, borderDash:[4,3]
+                }))
+            ]
+        },
+        options: {
+            responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{ position:'bottom', labels:{ color:'#94a3b8', boxWidth:10, font:{size:10} } } },
+            scales: {
+                x:{ title:{display:true, text:'Monthly Cycle', color:'#94a3b8'}, ticks:{color:'#94a3b8'}, grid:{color:'rgba(255,255,255,0.05)'} },
+                y:{ title:{display:true, text:'% of Cohort', color:'#94a3b8'},
+                    ticks:{color:'#94a3b8', callback:v=>v+'%'}, grid:{color:'rgba(255,255,255,0.05)'}, min:0, max:100 }
+            }
+        }
+    });
+    // Auto-resize: 12-month trace with 10 datasets — taller for legend
+    autoResizeChart('wrap-cohortTraceChart', 'line', 12, 300, 420);
+    if (_charts['trace']) _charts['trace'].resize();
+}
+
+
+function updateHeadroom(res, inputs) {
+    destroyChart('hr');
+    const canvas = document.getElementById('headroomChart');
+    if (!canvas) return;
+
+    const yMax = vd('axHrYmax', 500);
+
+    _charts['hr'] = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: res.headroom.map(h => h.effectiveness+'%'),
+            datasets: [
+                {
+                    label: 'Cost-Saving Limit (£)',
+                    data:  res.headroom.map(h => h.costSavingMax),
+                    borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.12)',
+                    fill:true, tension:0.3, borderWidth:2
                 },
-                scales: {
-                    x: {
-                        grid: { color: 'rgba(255,255,255,0.05)' },
-                        ticks: { color: '#cbd5e1' }
-                    },
-                    y: {
-                        grid: { color: 'rgba(255,255,255,0.05)' },
-                        ticks: { 
-                            color: '#cbd5e1',
-                            callback: (v) => {
-                                if (Math.abs(v) >= 1e6) return symb + (v / 1e6).toFixed(1) + 'M';
-                                if (Math.abs(v) >= 1e3) return symb + (v / 1e3).toFixed(0) + 'k';
-                                return symb + v;
-                            }
-                        }
-                    }
+                {
+                    label: `Cost-Effective Limit @ £${inputs.wtp.toLocaleString('en-GB')}/QALY`,
+                    data:  res.headroom.map(h => h.costEffectiveMax),
+                    borderColor:'#38bdf8', backgroundColor:'rgba(56,189,248,0.08)',
+                    fill:'-1', tension:0.3, borderWidth:2
+                },
+                {
+                    label: `Current VR + Setup Cost (£${(inputs.vrCost + inputs.costOneOff).toFixed(2)})`,
+                    data:  res.headroom.map(() => inputs.vrCost + inputs.costOneOff),
+                    borderColor:'#f59e0b', borderDash:[6,4], pointRadius:0,
+                    tension:0, borderWidth:1.5
                 }
+            ]
+        },
+        options: {
+            responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{ position:'bottom', labels:{ color:'#94a3b8', boxWidth:12, font:{size:11} } } },
+            scales: {
+                x:{ title:{display:true, text:'VR Scenario Efficacy (%)', color:'#94a3b8'}, ticks:{color:'#94a3b8', maxRotation:0}, grid:{color:'rgba(255,255,255,0.05)'} },
+                y:{ title:{display:true, text:'Max Viable Total VR Cost (£)', color:'#94a3b8'},
+                    ticks:{color:'#94a3b8', callback:v=>'£'+v}, grid:{color:'rgba(255,255,255,0.05)'}, min:0, max:yMax }
             }
-        });
-    }
-
-    // Link and Synchronize range sliders and number input elements across dashboards
-    function linkSliderAndNum(sliderId, numId, runCb) {
-        const slider = document.getElementById(sliderId);
-        const num = document.getElementById(numId);
-        if (slider && num) {
-            slider.addEventListener('input', (e) => {
-                num.value = e.target.value;
-                if (typeof runCb === 'function') runCb();
-            });
-            num.addEventListener('input', (e) => {
-                slider.value = e.target.value;
-                if (typeof runCb === 'function') runCb();
-            });
         }
-    }
-
-    // Bind sync links
-    // 1. VR Model Tab
-    linkSliderAndNum('vrCost', 'vrCostNum', window.updateDashboardVr || (() => {}));
-    linkSliderAndNum('opioidReduction', 'opioidReductionNum', window.updateDashboardVr || (() => {}));
-    linkSliderAndNum('cpspRisk', 'cpspRiskNum', window.updateDashboardVr || (() => {}));
-
-    // 2. Sandbox Tab
-    linkSliderAndNum('vrCostAdv', 'vrCostNumAdv', window.updateDashboardAdv || (() => {}));
-    linkSliderAndNum('opioidReductionAdv', 'opioidReductionNumAdv', window.updateDashboardAdv || (() => {}));
-    linkSliderAndNum('cpspRiskAdv', 'cpspRiskNumAdv', window.updateDashboardAdv || (() => {}));
-
-    // 3. PLP Tab
-    linkSliderAndNum('vrCostPlp', 'vrCostNumPlp', window.updateDashboardPlp || (() => {}));
-    linkSliderAndNum('painReductionPlp', 'painReductionNumPlp', window.updateDashboardPlp || (() => {}));
-    linkSliderAndNum('plpRiskPlp', 'plpRiskNumPlp', window.updateDashboardPlp || (() => {}));
-
-    // Bind event update triggers from advanced inputs to sync with societal tab
-    const advancedElIds = ['wtpAdv', 'vrCostAdv', 'opioidReductionAdv', 'cpspRiskAdv', 'wtpPlp', 'vrCostPlp', 'painReductionPlp', 'plpRiskPlp'];
-    advancedElIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('input', () => { if (tabSocietal.classList.contains('active')) updateSocietalForecast(); if (typeof updateHtaAnalysis === 'function') updateHtaAnalysis(); });
     });
+    // Auto-resize: headroom line chart — grows with number of efficacy steps
+    const hrPoints = res.headroom ? res.headroom.length : 10;
+    autoResizeChart('wrap-headroomChart', 'line', hrPoints, 260, 380);
+    if (_charts['hr']) _charts['hr'].resize();
+}
 
 
-    // NICE & UK HTA Pathways Assessment Engine
-    function updateHtaAnalysis() {
-        const prefix = lastActiveDashboard === 'plp' ? 'plp' : 'adv';
-        const cap = prefix.charAt(0).toUpperCase() + prefix.slice(1);
-        const isPlp = prefix === 'plp';
+function updateTornado(res) {
+    destroyChart('tor');
+    const canvas = document.getElementById('tornadoChart');
+    if (!canvas || !res.tornado) return;
 
-        // Fetch inputs from the last active dashboard
-        const wtp = parseFloat(document.getElementById('wtp' + cap).value) || 20000;
-        const vrCost = parseFloat(document.getElementById('vrCost' + cap).value) || 40.55;
-        const efficacy = parseFloat(document.getElementById(isPlp ? 'painReductionPlp' : 'opioidReductionAdv').value) || 2.8;
-        const baseRisk = parseFloat(document.getElementById(isPlp ? 'plpRiskPlp' : 'cpspRiskAdv').value) || 15;
+    const base = isFinite(res.tornado.baseICER) ? res.tornado.baseICER : 0;
+    const data = res.tornado.data;
 
-        // Perform Markov simulation using current dashboard settings
-        let g = {
-            utilPainFree: parseGlobalVal('utilPf' + cap, 1.0),
-            utilNonOpioid: parseGlobalVal('utilNonOp' + cap, 0.93),
-            utilOpioid: parseGlobalVal('utilOpioid' + cap, 0.61),
-            utilCPSP: parseGlobalVal('utilCpsp' + cap, 0.59),
-            costGP: parseGlobalVal('costGP' + cap, 32.04),
-            costSpecialist: parseGlobalVal('costSpecialist' + cap, 225.00),
-            costChronicCare: parseGlobalVal('costChronicCare' + cap, 119.51),
-            costCaregiver: parseGlobalVal('costCaregiver' + cap, 19.51),
-            informalCareCPSP: parseGlobalVal('informalCareCPSP' + cap, 20),
-            informalCareOpioid: parseGlobalVal('informalCareOpioid' + cap, 20),
-            informalCareNonOpioid: parseGlobalVal('informalCareNonOpioid' + cap, 8),
-            popAge: parseGlobalVal('popAge' + cap, 65),
-            pctMale: parseGlobalVal('pctMale' + cap, 0.50),
-            oneOffCost: parseGlobalVal('oneOffCost' + cap, 0),
-            sessionCost: parseGlobalVal('sessionCost' + cap, 0),
-            numSessions: parseGlobalVal('numSessions' + cap, 1),
-            wtp: wtp,
-            vrCost: vrCost,
-            opioidReduction: efficacy,
-            cpspRisk: baseRisk,
-            currency: currentCurrency
-        };
-        
-        const rCost = parseGlobalVal('roboticsCost' + cap, 0);
-        g.vrCost += rCost;
-
-        const m = new MarkovModel(g);
-        m.baseParams.currency = currentCurrency;
-        const res = m.run();
-
-        // 1. NICE Health Technology Evaluation (HTE) Pathways
-        const standardWtpGbp = 20000;
-        let standardWtp = standardWtpGbp;
-        if (currentCurrency !== 'GBP') {
-            standardWtp = Math.round(standardWtpGbp / rate_eur_to_gbp);
-        }
-
-        let hteStatus = '';
-        let hteColor = '';
-        let barPct = 0;
-
-        if (res.incQaly <= 0) {
-            hteStatus = 'NOT COST-EFFECTIVE: Clinically dominated (negative health benefit). Standard care preferred.';
-            hteColor = '#ef4444';
-            barPct = 0;
-        } else {
-            const currentIcer = res.incCost / res.incQaly;
-            if (currentIcer <= standardWtp) {
-                hteStatus = `COST-EFFECTIVE: ICER is ${formatCurrency(currentIcer)}/QALY. Well below NICE standard threshold (${formatCurrency(standardWtp)}/QALY). Approved.`;
-                hteColor = '#10b981';
-                barPct = Math.min(100, Math.max(10, Math.round((standardWtp / currentIcer) * 50)));
-            } else if (currentIcer <= standardWtp * 1.5) {
-                hteStatus = `MARGINAL: ICER is ${formatCurrency(currentIcer)}/QALY. Exceeds primary £20k threshold but fits NHS highly specialized technology exceptions (up to £30k/QALY).`;
-                hteColor = '#eab308';
-                barPct = 65;
-            } else {
-                hteStatus = `NOT RECOMMENDED: ICER is ${formatCurrency(currentIcer)}/QALY. Significantly exceeds £30k/QALY upper HTA threshold. Requires discount or higher efficacy.`;
-                hteColor = '#ef4444';
-                barPct = 90;
+    _charts['tor'] = new Chart(canvas.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: data.map(d => d.label),
+            datasets: [
+                { label:'Low Param',  data:data.map(d => d.lowImpactValue  - base), backgroundColor:'rgba(245,158,11,0.8)' },
+                { label:'High Param', data:data.map(d => d.highImpactValue - base), backgroundColor:'rgba(56,189,248,0.8)'  }
+            ]
+        },
+        options: {
+            indexAxis:'y',
+            responsive:true, maintainAspectRatio:false,
+            plugins:{
+                legend:{ position:'bottom', labels:{ color:'#94a3b8', boxWidth:12, font:{size:11} } },
+                tooltip:{ callbacks:{ label: c => `ICER: ${fmt0(c.raw + base)}/QALY` } }
+            },
+            scales: {
+                x:{ title:{display:true, text:'Deviation from Base ICER (£/QALY)', color:'#94a3b8'},
+                    ticks:{color:'#94a3b8'}, grid:{color:'rgba(255,255,255,0.05)'} },
+                y:{ ticks:{color:'#94a3b8', font:{size:10}}, grid:{color:'rgba(255,255,255,0.04)'} }
             }
         }
-
-        const hteEl = document.getElementById('htaHteResult');
-        hteEl.textContent = hteStatus;
-        hteEl.style.color = hteColor;
-        document.getElementById('htaThresholdBar').style.backgroundColor = hteColor;
-        document.getElementById('htaThresholdBar').style.width = barPct + '%';
-
-        // 2. NICE Evidence Standards Framework (ESF) for Digital Health
-        let esfStatus = '';
-        let esfColor = '';
-        if (efficacy < 1.0) {
-            esfStatus = 'Tier C Evidentiary Match. Current trial-efficacy is insufficient (< 1%). Randomized Controlled Trials (RCTs) or comparative studies required.';
-            esfColor = '#ef4444';
-        } else if (efficacy < 5.0) {
-            esfStatus = 'Tier C Evidentiary Match. Meets minimum trial efficacy bounds. Requires formal real-world evidence (RWE) registries to support NICE standard recommendation.';
-            esfColor = '#eab308';
-        } else {
-            esfStatus = 'Tier C Evidentiary Match. High clinical efficacy (> 5%). Meets evidentiary standards for standard NHS commissioning pathways.';
-            esfColor = '#10b981';
-        }
-        const esfEl = document.getElementById('htaEsfResult');
-        esfEl.textContent = esfStatus;
-        esfEl.style.color = esfColor;
-
-        // 3. NICE Early Value Assessment (EVA)
-        let evaStatus = '';
-        let evaColor = '';
-        if (res.nmb >= 0 && efficacy >= 2.0) {
-            evaStatus = 'Strong candidate for EVA. High probability of standard commissioning. Eligible for early access program funding.';
-            evaColor = '#10b981';
-        } else if (res.nmb < 0 && efficacy > 1.0) {
-            evaStatus = 'Moderate candidate. Promising clinical signal but economically unachievable. Access requires evidence generation under NICE conditional guidance.';
-            evaColor = '#eab308';
-        } else {
-            evaStatus = 'Ineligible for Early Access. Insufficient efficacy to justify early NHS adoption funding.';
-            evaColor = '#ef4444';
-        }
-        const evaEl = document.getElementById('htaEvaResult');
-        evaEl.textContent = evaStatus;
-        evaEl.style.color = evaColor;
-
-        // 4. MHRA Software as a Medical Device (SaMD)
-        const samdUse = document.getElementById('htaSamdDeviceClass').value;
-        let samdStatus = '';
-        let samdColor = '';
-        if (samdUse === 'critical') {
-            samdStatus = 'Class III (High Risk). Software impacts critical clinical outcomes. Requires MHRA Notified Body certification and UKCA mark audited clinical files.';
-            samdColor = '#ef4444';
-        } else if (samdUse === 'treatment') {
-            samdStatus = 'Class IIa/IIb (Medium Risk). Software directly treats pain states. Requires Notified Body audit of Software Life Cycle (EN 62304) and ISO 13485 QMS.';
-            samdColor = '#eab308';
-        } else {
-            samdStatus = 'Class I (Low Risk). Software provides monitoring or journaling. Eligible for UKCA self-declaration pathway.';
-            samdColor = '#10b981';
-        }
-        const mhraEl = document.getElementById('htaMhraResult');
-        mhraEl.textContent = samdStatus;
-        mhraEl.style.color = samdColor;
-
-        // 5. NHS Digital Technology Assessment Criteria (DTAC)
-        const dtacSafety = document.getElementById('dtacSafety').checked;
-        const dtacCyber = document.getElementById('dtacCyber').checked;
-        const dtacGdpr = document.getElementById('dtacGdpr').checked;
-        const dtacInterop = document.getElementById('dtacInterop').checked;
-
-        let dtacStatus = '';
-        let dtacColor = '';
-        let dtacCount = (dtacSafety?1:0) + (dtacCyber?1:0) + (dtacGdpr?1:0) + (dtacInterop?1:0);
-
-        if (dtacCount === 4) {
-            dtacStatus = 'DTAC Approved. Meets clinical safety (DCB0129), data protection (GDPR), cyber security (Essentials+), and interoperability standards.';
-            dtacColor = '#10b981';
-        } else if (dtacSafety && dtacCyber && dtacGdpr) {
-            dtacStatus = 'DTAC Conditional. Missing interoperability standards. Restricts NHS system integrations.';
-            dtacColor = '#eab308';
-        } else {
-            dtacStatus = 'DTAC Blocked. Fails to meet core pre-requisites (Clinical Safety, Cybersecurity, or GDPR). Restricts deployment inside the NHS.';
-            dtacColor = '#ef4444';
-        }
-        const dtacEl = document.getElementById('htaDtacResult');
-        dtacEl.textContent = dtacStatus;
-        dtacEl.style.color = dtacColor;
-
-        // 6. Clinical Guideline NG211 Compliance
-        const rehabContext = document.getElementById('htaClinicalContext').value;
-        let ngResult = '';
-        let ngColor = '';
-        if (rehabContext === 'neuro' && isPlp) {
-            ngResult = 'Complies with Section 1.5 of NG211. Active neuropathic pain management using digital modalities to prevent pain chronification.';
-            ngColor = '#10b981';
-        } else if (rehabContext === 'ortho' && !isPlp) {
-            ngResult = 'Complies with Section 1.2 of NG211. Early active mobilization post major orthopaedic surgeries to decrease opioid dependency.';
-            ngColor = '#10b981';
-        } else {
-            ngResult = 'Partial Match. Clinical modality matches rehabilitation context, but requires explicit protocol configuration for clinical team alignment.';
-            ngColor = '#eab308';
-        }
-        const ngEl = document.getElementById('htaNg211Result');
-        ngEl.textContent = ngResult;
-        ngEl.style.color = ngColor;
-
-        // 7. Overall Market Access Summary
-        const badge = document.getElementById('htaOverallStatus');
-        let reportHtml = '';
-        const curSym = currentCurrency === 'GBP' ? '£' : '€';
-
-        if (res.nmb >= 0 && dtacCount === 4 && samdUse !== 'critical') {
-            badge.textContent = 'READY FOR AUDIT';
-            badge.style.color = '#10b981';
-            badge.style.borderColor = '#10b981';
-            badge.style.background = 'rgba(16,185,129,0.1)';
-            
-            reportHtml = `<p>The current system configuration meets the NICE cost-effectiveness criteria at a threshold of <strong>${formatCurrency(wtp)}/QALY</strong> with an incremental Net Benefit of <strong>${formatCurrency(res.nmb)}</strong> per patient. Fulfilling NHS DTAC and mapping to NG211 rehabilitation criteria positions the technology for standard regional commissioning under the NICE Health Technology Evaluation pathway.</p>`;
-        } else if (res.nmb >= 0) {
-            badge.textContent = 'CONDITIONAL ECONOMIC FIT';
-            badge.style.color = '#eab308';
-            badge.style.borderColor = '#eab308';
-            badge.style.background = 'rgba(234,179,8,0.1)';
-            
-            reportHtml = `<p>While the economic evaluation proves cost-effective (NMB = <strong>${formatCurrency(res.nmb)}</strong>), the regulatory pathway requires addressing outstanding compliance gaps (NHS DTAC audit failures or MHRA Software classification audits). Review ISO 13485 QMS alignment and ensure interoperability standard mappings before regional NHS procurement submission.</p>`;
-        } else {
-            badge.textContent = 'NOT COMMISSIONABLE';
-            badge.style.color = '#ef4444';
-            badge.style.borderColor = '#ef4444';
-            badge.style.background = 'rgba(239,68,68,0.1)';
-            
-            reportHtml = `<p>The digital health intervention is currently <strong>not commissionable</strong> because it exceeds standard cost-effectiveness bounds (Net Monetary Benefit is negative: <strong>${formatCurrency(res.nmb)}</strong>). To secure regional NHS funding, increase clinical efficacy (currently <strong>${efficacy}%</strong>) or seek standard care acquisition discount strategies to lower the acquisition cost of <strong>${formatCurrency(vrCost)}</strong>.</p>`;
-        }
-
-        document.getElementById('htaSummaryReport').innerHTML = reportHtml;
-    }
-
-    // Bind triggers to re-run HTA reports
-    const htaTriggerIds = ['htaClinicalContext', 'htaSamdDeviceClass', 'dtacSafety', 'dtacCyber', 'dtacGdpr', 'dtacInterop'];
-    htaTriggerIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('change', updateHtaAnalysis);
     });
+    // Auto-resize: tornado grows with number of DSA parameters
+    const numBars = res.tornado && res.tornado.data ? res.tornado.data.length : 6;
+    autoResizeChart('wrap-tornadoChart', 'bar-h', numBars, 220, 560);
+    if (_charts['tor']) _charts['tor'].resize();
+}
 
 
-
-    // Capital System Budget Solver Engine
-    let solvedMaxCeBudgetPerPatient = 0;
-    let solvedMaxCsBudgetPerPatient = 0;
-
-    function solveCapitalBudget() {
-        const prefix = 'plp';
-        const cap = 'Plp';
-        const wtp = parseFloat(document.getElementById('wtpPlp').value) || 20000;
-        const vrCost = parseFloat(document.getElementById('vrCostPlp').value) || 40.55;
-        const efficacy = parseFloat(document.getElementById('painReductionPlp').value) || 2.8;
-        const baseRisk = parseFloat(document.getElementById('plpRiskPlp').value) || 15;
-
-        // Base case parameters excluding capital cost
-        let g = {
-            utilPainFree: parseGlobalVal('utilPfPlp', 1.0),
-            utilNonOpioid: parseGlobalVal('utilNonOpPlp', 0.93),
-            utilOpioid: parseGlobalVal('utilOpioidPlp', 0.61),
-            utilCPSP: parseGlobalVal('utilCpspPlp', 0.59),
-            costGP: parseGlobalVal('costGPPlp', 32.04),
-            costSpecialist: parseGlobalVal('costSpecialistPlp', 225.00),
-            costChronicCare: parseGlobalVal('costChronicCarePlp', 119.51),
-            costCaregiver: parseGlobalVal('costCaregiverPlp', 19.51),
-            informalCareCPSP: parseGlobalVal('informalCareCPSPPlp', 20),
-            informalCareOpioid: parseGlobalVal('informalCareOpioidPlp', 20),
-            informalCareNonOpioid: parseGlobalVal('informalCareNonOpioidPlp', 8),
-            popAge: parseGlobalVal('popAgePlp', 65),
-            pctMale: parseGlobalVal('pctMalePlp', 0.50),
-            oneOffCost: 0, // Force 0 to find the headroom
-            sessionCost: parseGlobalVal('sessionCostPlp', 0),
-            numSessions: parseGlobalVal('numSessionsPlp', 1),
-            wtp: wtp,
-            vrCost: vrCost,
-            opioidReduction: efficacy,
-            cpspRisk: baseRisk,
-            currency: currentCurrency
-        };
-
-        const m = new MarkovModel(g);
-        const res = m.run();
-
-        // Sync current patients per system from PLP panel to the modal input first
-        const currentPatients = parseFloat(document.getElementById('patientsPerSystemPlp').value) || 100;
-        document.getElementById('budgetPatientsPerSystem').value = currentPatients;
-
-        // Calculate budgets
-        solvedMaxCeBudgetPerPatient = Math.max(0, res.nmb);
-        solvedMaxCsBudgetPerPatient = Math.max(0, -res.incCost);
-
-        updateBudgetModalValues();
-
-        document.getElementById('systemBudgetModal').style.display = 'flex';
+function updateHtaDisplay(res, inputs) {
+    const el = document.getElementById('htaIcerDisplay');
+    if (!el) return;
+    const wtp     = inputs.wtp;
+    const wtpHigh = Math.round(wtp * 1.4);  // upper of NICE band (~35k if wtp=25k)
+    const modMax  = Math.round(wtp * 2.38); // severity modifier ×1.7 on upper band
+    if (res.incCost < 0 && res.incQaly > 0) {
+        const sav = Math.abs(res.incCost / res.incQaly);
+        el.textContent = `🌟 DOMINANT — £${Math.round(sav).toLocaleString('en-GB')}/QALY saved — UCLTouchRehab saves money and improves outcomes`;
+        el.style.color = '#a855f7';
+    } else if (!isFinite(res.icer) || res.incQaly <= 0) {
+        el.textContent = 'ICER: Not calculable (ΔE ≤ 0) — dominated scenario';
+        el.style.color = '#ef4444';
+    } else if (res.icer <= wtp) {
+        el.textContent = `✅ ICER: ${fmt0(res.icer)}/QALY — Cost-effective at £${wtp.toLocaleString('en-GB')}/QALY threshold`;
+        el.style.color = '#10b981';
+    } else if (res.icer <= wtpHigh) {
+        el.textContent = `⚠️ ICER: ${fmt0(res.icer)}/QALY — Borderline (£${wtp.toLocaleString('en-GB')}k–£${wtpHigh.toLocaleString('en-GB')}/QALY band)`;
+        el.style.color = '#f59e0b';
+    } else if (res.icer <= modMax) {
+        el.textContent = `🔶 ICER: ${fmt0(res.icer)}/QALY — Above standard threshold, within severity-modifier range (×1.7 max = £${modMax.toLocaleString('en-GB')})`;
+        el.style.color = '#f59e0b';
+    } else {
+        el.textContent = `❌ ICER: ${fmt0(res.icer)}/QALY — Above £${modMax.toLocaleString('en-GB')}/QALY (severity-modifier ceiling)`;
+        el.style.color = '#ef4444';
     }
 
-    function updateBudgetModalValues() {
-        const patients = parseFloat(document.getElementById('budgetPatientsPerSystem').value) || 100;
-        const maxCeSystem = solvedMaxCeBudgetPerPatient * patients;
-        const maxCsSystem = solvedMaxCsBudgetPerPatient * patients;
+    const bi = document.getElementById('htaBudgetImpact');
+    if (bi) {
+        const popSize     = 2000;
+        const totalBudget = (inputs.vrCost + inputs.costOneOff) * popSize;
+        const totalSaving = (res.sc.totalCosts - (res.vr.totalCosts - inputs.vrCost - inputs.costOneOff)) * popSize;
+        bi.innerHTML = `
+            <strong>Estimated NHS England Budget Impact (N≈2,000 upper-limb amputees/year):</strong><br>
+            Technology acquisition: <strong>${fmt0(totalBudget)}/year</strong> &nbsp;|&nbsp;
+            Estimated downstream savings: <strong>${fmt0(totalSaving)}/year</strong> &nbsp;|&nbsp;
+            Net budget impact: <strong style="color:${totalSaving > totalBudget ? '#10b981' : '#f59e0b'}">${fmt0(totalBudget - totalSaving)}</strong>
+        `;
+    }
+}
 
-        const solvedMaxCombinedBudgetPerPatient = Math.min(solvedMaxCeBudgetPerPatient, solvedMaxCsBudgetPerPatient);
-        const maxCombinedSystem = solvedMaxCombinedBudgetPerPatient * patients;
+/* ═══════════════════ THRESHOLD PRICE SETTERS ═══════════════════ */
 
-        document.getElementById('budgetCeRange').textContent = formatCurrency(maxCeSystem);
-        document.getElementById('budgetCePerPatient').textContent = `Up to ${formatCurrency(solvedMaxCeBudgetPerPatient)} / patient`;
-        
-        document.getElementById('budgetCsRange').textContent = formatCurrency(maxCsSystem);
-        document.getElementById('budgetCsPerPatient').textContent = `Up to ${formatCurrency(solvedMaxCsBudgetPerPatient)} / patient`;
+/**
+ * Compute downstream savings with ZERO device cost, then set either
+ * vrCost or costOneOff to the appropriate ceiling, keeping the other fixed.
+ *
+ * targetType : 'cs'  → cost-saving ceiling  (ΔC = 0)
+ *              'ce25' → CE ceiling at £25,000/QALY (NMB = 0 at λ=25000)
+ *              'ce35' → CE ceiling at £35,000/QALY (NMB = 0 at λ=35000)
+ * assignTo   : 'vr'     → set vrCost input
+ *              'oneoff' → set costOneOff input
+ */
+window.solveToThreshold = function (targetType, assignTo) {
+    const inputs = getInputs();
 
-        document.getElementById('budgetCombinedRange').textContent = formatCurrency(maxCombinedSystem);
-        document.getElementById('budgetCombinedPerPatient').textContent = `Up to ${formatCurrency(solvedMaxCombinedBudgetPerPatient)} / patient`;
+    // Run model with ZERO device costs to isolate pure downstream state savings
+    const inputs0 = { ...inputs, vrCost: 0, costOneOff: 0 };
+    const res0    = new PLPMarkovModel(inputs0).run();
+    const savings = res0.sc.totalCosts - res0.vr.totalCosts;   // positive = VR saves money
+    const deltaQ  = res0.vr.totalQALYs - res0.sc.totalQALYs;  // positive = VR gives more QALYs
+
+    // Full ceiling — the OTHER cost is zeroed, so the solved field gets the entire budget
+    let ceiling;
+    if (targetType === 'cs')   ceiling = savings;
+    if (targetType === 'ce25') ceiling = savings + 25000 * deltaQ;
+    if (targetType === 'ce35') ceiling = savings + 35000 * deltaQ;
+
+    const solved = Math.max(0, parseFloat(ceiling.toFixed(2)));
+
+    // IDs for the solved field and the field to zero out
+    const solvedId = assignTo === 'vr' ? 'vrCost'    : 'costOneOff';
+    const zeroId   = assignTo === 'vr' ? 'costOneOff': 'vrCost';
+
+    // Set solved field
+    const el = document.getElementById(solvedId);
+    if (!el) return;
+    el.value = solved;
+    el.style.transition = 'background 0.3s';
+    el.style.background = 'rgba(16,185,129,0.25)';
+    setTimeout(() => { el.style.background = ''; }, 1200);
+
+    // Zero out the other field
+    const elZero = document.getElementById(zeroId);
+    if (elZero) {
+        elZero.value = '0';
+        elZero.style.transition = 'background 0.3s';
+        elZero.style.background = 'rgba(100,116,139,0.2)';
+        setTimeout(() => { elZero.style.background = ''; }, 1200);
     }
 
-    // Modal listeners
-    const btnCalcSystemBudgetPlp = document.getElementById('btnCalcSystemBudgetPlp');
-    if (btnCalcSystemBudgetPlp) {
-        btnCalcSystemBudgetPlp.addEventListener('click', solveCapitalBudget);
+    // Feedback badge
+    const labels   = { cs: 'Cost-Saving', ce25: 'CE @ £25k WTP', ce35: 'CE @ £35k WTP' };
+    const fieldName = assignTo === 'vr' ? 'VR Therapy Cost' : 'One-off Setup Cost';
+    const zeroName  = assignTo === 'vr' ? 'One-off cost'    : 'VR Therapy Cost';
+    const badge = document.getElementById('solverBadge');
+    if (badge) {
+        badge.textContent = `✅ ${fieldName} → £${solved.toFixed(2)} (${labels[targetType]} ceiling) | ${zeroName} → £0 | Savings £${savings.toFixed(2)}, ΔQALYs ${deltaQ.toFixed(5)}`;
+        badge.style.display = 'block';
+        setTimeout(() => { badge.style.display = 'none'; }, 7000);
     }
 
-    const closeBudgetModalBtn = document.getElementById('closeBudgetModalBtn');
-    if (closeBudgetModalBtn) {
-        closeBudgetModalBtn.addEventListener('click', () => {
-            document.getElementById('systemBudgetModal').style.display = 'none';
-        });
+    recalculateAll();
+};
+
+/**
+ * Binary-search the minimum efficacy % at current prices to achieve
+ * the target (cost-saving or CE at £25k WTP).
+ *
+ * targetType : 'cs'  → cost-saving (ΔC < 0)
+ *              'ce25' → CE at £25,000/QALY
+ */
+window.solveEfficacy = function (targetType) {
+    const inputs = getInputs();
+    const wtp    = targetType === 'ce25' ? 25000 : 0;
+
+    // Binary search between 0 and 100%
+    let lo = 0, hi = 100, mid, isMet;
+    for (let iter = 0; iter < 50; iter++) {
+        mid  = (lo + hi) / 2;
+        const r = new PLPMarkovModel({ ...inputs, painReduction: mid }).run();
+        const dc = r.vr.totalCosts - r.sc.totalCosts;
+        const dq = r.vr.totalQALYs - r.sc.totalQALYs;
+        if (targetType === 'cs')   isMet = (dc < 0);
+        if (targetType === 'ce25') isMet = (dq * 25000 - dc >= 0);
+        if (isMet) hi = mid; else lo = mid;
+        if (hi - lo < 0.0001) break;
     }
 
-    const budgetPatientsInput = document.getElementById('budgetPatientsPerSystem');
-    if (budgetPatientsInput) {
-        budgetPatientsInput.addEventListener('input', updateBudgetModalValues);
+    const solved = parseFloat(mid.toFixed(3));
+    const el = document.getElementById('painReduction');
+    if (!el) return;
+    el.value = solved;
+
+    el.style.transition = 'background 0.3s';
+    el.style.background = 'rgba(56,189,248,0.25)';
+    setTimeout(() => { el.style.background = ''; }, 1200);
+
+    const badge = document.getElementById('solverBadge');
+    const labels = { cs: 'Cost-Saving', ce25: 'CE @ £25k WTP' };
+    if (badge) {
+        badge.textContent = `🔍 Min Efficacy for ${labels[targetType]}: ${solved.toFixed(3)}% at current VR cost £${inputs.vrCost.toFixed(2)} + setup £${inputs.costOneOff.toFixed(2)}`;
+        badge.style.display = 'block';
+        setTimeout(() => { badge.style.display = 'none'; }, 6000);
     }
 
-    window.solveCapitalBudget = solveCapitalBudget;
-    window.updateBudgetModalValues = updateBudgetModalValues;
+    recalculateAll();
+};
 
-    const btnApplyBudgetLimit = document.getElementById('btnApplyBudgetLimit');
-    if (btnApplyBudgetLimit) {
-        btnApplyBudgetLimit.addEventListener('click', () => {
-            const oneOffInput = document.getElementById('oneOffCostPlp');
-            const patientsInput = document.getElementById('patientsPerSystemPlp');
-            const patients = parseFloat(document.getElementById('budgetPatientsPerSystem').value) || 100;
-            const solvedMaxCombinedBudgetPerPatient = Math.min(solvedMaxCeBudgetPerPatient, solvedMaxCsBudgetPerPatient);
-            const maxCombinedSystem = solvedMaxCombinedBudgetPerPatient * patients;
-            
-            // Set patients per system to match solver modal count
-            if (patientsInput) {
-                patientsInput.value = patients;
-            }
-            
-            if (oneOffInput) {
-                oneOffInput.value = maxCombinedSystem.toFixed(2);
-                oneOffInput.dispatchEvent(new Event('input'));
-            }
-            document.getElementById('systemBudgetModal').style.display = 'none';
-        });
+/* ═══════════════════ CAPITAL BUDGET RANGE SOLVER ═══════════════════ */
+window.solveBudgetRange = function () {
+    const inputs = getInputs();
+    const capMin = vd('capBudMin', 10);
+    const capMax = vd('capBudMax', 200);
+    const steps  = 10;
+    const step   = (capMax - capMin) / steps;
+
+    const tbody = document.getElementById('capBudTbody');
+    if (!tbody) { console.error('capBudTbody not found'); return; }
+
+    // Usual-care arm is constant regardless of VR device cost
+    const scArm = new PLPMarkovModel(inputs).simulateArm(false);
+
+    let rows = '';
+    for (let i = 0; i <= steps; i++) {
+        const cost = parseFloat((capMin + i * step).toFixed(2));
+
+        // Create model with this specific VR therapy cost (keep costOneOff fixed)
+        const m   = new PLPMarkovModel({ ...inputs, vrCost: cost });
+        const vr  = m.simulateArm(true);
+        const dq  = vr.totalQALYs - scArm.totalQALYs;
+        const ic  = vr.totalCosts  - scArm.totalCosts;
+        const icer = (dq !== 0 && isFinite(ic / dq)) ? ic / dq : Infinity;
+        const nmb  = dq * inputs.wtp - ic;
+        const cohortBudget = (cost + inputs.costOneOff) * inputs.cohortSize;
+
+        let statusText, statusCol;
+        if (ic < 0 && dq > 0)                          { statusText = '🌟 Dominant'; statusCol = '#a855f7'; }
+        else if (isFinite(icer) && icer <= inputs.wtp)  { statusText = '✅ Cost-effective'; statusCol = '#10b981'; }
+        else if (!isFinite(icer))                        { statusText = '⚠ N/A';      statusCol = '#64748b'; }
+        else                                             { statusText = '❌ Not CE';   statusCol = '#ef4444'; }
+
+        // When dominant show £X/QALY SAVED so the cell carries scientific meaning
+        const icerDisplay = (ic < 0 && dq > 0)
+            ? `🌟 ${fmt0(Math.abs(ic / dq))}/QALY saved`
+            : (isFinite(icer) ? fmt0(icer) + '/QALY' : '—');
+
+        rows += `<tr>
+            <td>£${cost.toFixed(2)}</td>
+            <td>${fmt(cohortBudget)}</td>
+            <td style="color:${ic < 0 ? '#10b981' : '#ef4444'}">${fmt(ic)}</td>
+            <td>${fmtN(dq, 4)}</td>
+            <td>${icerDisplay}</td>
+            <td style="color:${nmb >= 0 ? '#10b981' : '#ef4444'}">${fmt(nmb)}</td>
+            <td style="color:${statusCol}; font-weight:700;">${statusText}</td>
+        </tr>`;
     }
 
+    tbody.innerHTML = rows;
 
+    // Reveal table
+    const wrap = document.getElementById('capBudTableWrap');
+    if (wrap) wrap.style.display = '';
+};
 
-    // Academic LaTeX math rendering engine using KaTeX
-    function renderMathFormulas() {
-        if (typeof katex !== 'undefined') {
-            document.querySelectorAll('.latex-math').forEach(el => {
-                try {
-                    katex.render(el.textContent, el, { throwOnError: false, displayMode: false });
-                } catch(e) {
-                    console.log("KaTeX inline error: " + e);
+/* ─── CTMC Panel Update ─── */
+function updateCtmcPanel(model) {
+    const panel = document.getElementById('ctmcPanel');
+    if (!panel) return;
+
+    if (!model.p.useCTMC) {
+        panel.innerHTML = '<p style="color:var(--text-muted); font-size:0.875rem;">Enable CTMC in the sidebar to see the derived monthly transition matrix and generator matrix Q.</p>';
+        return;
+    }
+
+    if (!model.ctmcMonthly) {
+        panel.innerHTML = '<p style="color:var(--danger);">CTMC computation failed — check browser console.</p>';
+        return;
+    }
+
+    const Q    = model.ctmcGenerator;
+    const Qraw = model.ctmcGeneratorRaw;
+    const Pm   = model.ctmcMonthly;
+    const Prec = model.ctmcReconstruction;
+    const Pobs = model.ctmcObsMatrix;
+    const val  = model.ctmcValidation;
+    const pmv  = model.ctmcPmValidation;
+    const t    = model.p.ctmcObsPeriod;
+    const nc   = model.ctmcNumClamped  || 0;
+    const mc   = model.ctmcMaxClamp    || 0;
+    const STATES = ['Pain Free', 'Mild PLP', 'Moderate PLP', 'Severe PLP', 'Death'];
+
+    // Reconstruction error — max |exp(Q×t) - P_obs| for non-death states
+    let reconErr = 0;
+    if (Prec && Pobs) {
+        for (let i = 0; i < 4; i++)
+            for (let j = 0; j < 5; j++)
+                reconErr = Math.max(reconErr, Math.abs(Prec[i][j] - Pobs[i][j]));
+    }
+
+    const validIcon = v => v.valid ? '✅' : (nc > 0 ? '🔧' : '⚠️');
+
+    const matTable = (M, title, highlight, compareM) => {
+        let h = `<div style="margin-top:1.2rem;"><h4 style="color:${highlight}; margin-bottom:0.5rem; font-size:0.9rem;">${title}</h4><div style="overflow-x:auto;"><table class="param-table" style="font-size:0.77rem;">`;
+        h += '<thead><tr><th>From \ To</th>' + STATES.map(s => `<th>${s}</th>`).join('') + '</tr></thead><tbody>';
+        M.forEach((r, i) => {
+            h += `<tr><td><strong>${STATES[i]}</strong></td>` + r.map((v, j) => {
+                const isNeg  = (i !== j) && v < -1e-9;
+                const isZero = Math.abs(v) < 1e-9;
+                let color = isZero ? '#64748b' : (isNeg ? '#ef4444' : '#e2e8f0');
+                // Highlight cells that were clamped (raw had negative, now 0)
+                let bgStyle = '';
+                if (compareM && i !== j && compareM[i][j] < -1e-9 && Math.abs(v) < 1e-9) {
+                    bgStyle = ' background:rgba(16,185,129,0.12);';
+                    color = '#10b981';
                 }
-            });
-            document.querySelectorAll('.latex-math-block').forEach(el => {
-                try {
-                    katex.render(el.textContent, el, { throwOnError: false, displayMode: true });
-                } catch(e) {
-                    console.log("KaTeX block error: " + e);
-                }
-            });
-        }
-    }
-
-    // Auto-trigger rendering on equations tab click
-    btnTabEquations.addEventListener('click', renderMathFormulas);
-
-
-    // CSV Export Handler
-    const btnExportCsv = document.getElementById('btnExportCsv');
-    if (btnExportCsv) {
-        btnExportCsv.addEventListener('click', () => {
-            const symb = currentCurrency === 'GBP' ? '£' : '€';
-            
-            // Gather Table 1 inputs
-            const tableParams = {};
-            globalInputIds.forEach(id => {
-                const el = document.getElementById(id);
-                tableParams[id] = el ? el.value : '';
-            });
-
-            // Gather active dashboard settings
-            const wtpVal = document.getElementById('wtpAdv') ? document.getElementById('wtpAdv').value : 20000;
-            const vrCostVal = document.getElementById('vrCostAdv') ? document.getElementById('vrCostAdv').value : 40.55;
-            const opioidReductionVal = document.getElementById('opioidReductionAdv') ? document.getElementById('opioidReductionAdv').value : 2.8;
-            const cpspRiskVal = document.getElementById('cpspRiskAdv') ? document.getElementById('cpspRiskAdv').value : 15;
-            
-            // Gather societal settings
-            const cohortSizeVal = document.getElementById('cohortSizeSocietalNum') ? document.getElementById('cohortSizeSocietalNum').value : 10000;
-            const weeklyEarningsVal = document.getElementById('weeklyEarningsSocietalNum') ? document.getElementById('weeklyEarningsSocietalNum').value : 650;
-            const employmentRateVal = document.getElementById('employmentRateSocietalNum') ? document.getElementById('employmentRateSocietalNum').value : 60;
-            const horizonVal = document.getElementById('horizonSocietalNum') ? document.getElementById('horizonSocietalNum').value : 5;
-
-            // Gather active KPI values from the DOM
-            const kpiIncCost = document.getElementById('kpiIncCostAdv') ? document.getElementById('kpiIncCostAdv').textContent : '';
-            const kpiIncQaly = document.getElementById('kpiIncQalyAdv') ? document.getElementById('kpiIncQalyAdv').textContent : '';
-            const kpiIcer = document.getElementById('kpiIcerAdv') ? document.getElementById('kpiIcerAdv').textContent : '';
-            const kpiNmb = document.getElementById('kpiNmbAdv') ? document.getElementById('kpiNmbAdv').textContent : '';
-
-            // Gather societal KPIs from DOM
-            const socHealthSavings = document.getElementById('kpiSocHealthSavings') ? document.getElementById('kpiSocHealthSavings').textContent : '';
-            const socProdSavings = document.getElementById('kpiSocProdSavings') ? document.getElementById('kpiSocProdSavings').textContent : '';
-            const socNetVal = document.getElementById('kpiSocNetValue') ? document.getElementById('kpiSocNetValue').textContent : '';
-            const socQaly = document.getElementById('kpiSocQalyGained') ? document.getElementById('kpiSocQalyGained').textContent : '';
-
-            let csvLines = [
-                '"Category","Parameter ID / Metric","Parameter / Metric Name","Value","Units"',
-                `"Configuration","currency","Active Currency","${currentCurrency}",""`,
-                `"Configuration","wtpAdv","Sandbox Willingness to Pay","${wtpVal}","${symb}"`,
-                `"Configuration","vrCostAdv","Sandbox VR Cost","${vrCostVal}","${symb}"`,
-                `"Configuration","opioidReductionAdv","Sandbox Opioid Efficacy","${opioidReductionVal}","%"`,
-                `"Configuration","cpspRiskAdv","Sandbox CPSP Risk","${cpspRiskVal}","%"`,
-                
-                `"Societal Inputs","cohortSize","Cohort Size","${cohortSizeVal}","Patients"`,
-                `"Societal Inputs","weeklyEarnings","Avg Weekly Earnings","${weeklyEarningsVal}","${symb}"`,
-                `"Societal Inputs","employmentRate","Employment Rate","${employmentRateVal}","%"`,
-                `"Societal Inputs","horizon","Forecast Horizon","${horizonVal}","Years"`,
-
-                `"Sandbox Result","incCost","Incremental Cost","${kpiIncCost.replace(/,/g, '')}","${symb}"`,
-                `"Sandbox Result","incQaly","Incremental QALYs","${kpiIncQaly}","QALYs"`,
-                `"Sandbox Result","icer","ICER","${kpiIcer.replace(/,/g, '')}","${symb}/QALY"`,
-                `"Sandbox Result","nmb","Net Monetary Benefit","${kpiNmb.replace(/,/g, '')}","${symb}"`,
-
-                `"Societal Results","socHealthSavings","Cumulative Health Savings","${socHealthSavings.replace(/,/g, '')}","${symb}"`,
-                `"Societal Results","socProdSavings","Cumulative Productivity Savings","${socProdSavings.replace(/,/g, '')}","${symb}"`,
-                `"Societal Results","socNetVal","Total Net Societal Value","${socNetVal.replace(/,/g, '')}","${symb}"`,
-                `"Societal Results","socQaly","Cohort QALYs Gained","${socQaly}","QALYs"`,
-                '',
-                '"Table 1 Parameters Grid","","","",""'
-            ];
-
-            for (const [key, val] of Object.entries(tableParams)) {
-                csvLines.push(`"Table 1 Parameter","${key}","${key}","${val}",""`);
-            }
-
-            const csv = csvLines.join('\r\n');
-
-            // Create download anchor
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `vr-health-econ-export-${currentCurrency}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+                return `<td style="color:${color};${bgStyle}">${v.toFixed(5)}</td>`;
+            }).join('') + '</tr>';
         });
+        h += '</tbody></table></div></div>';
+        return h;
+    };
+
+    // KPI row
+    let html = `<div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1rem;">
+        <div class="kpi-card" style="flex:1; min-width:160px;">
+            <div class="kpi-label">Observation Period</div>
+            <div class="kpi-value" style="font-size:1.3rem;">${t} months</div>
+            <div class="kpi-sub">${(t * 4.345).toFixed(1)} weeks</div>
+        </div>
+        <div class="kpi-card" style="flex:1; min-width:160px;">
+            <div class="kpi-label">Generator Valid</div>
+            <div class="kpi-value" style="font-size:1.3rem;">${validIcon(val)} ${val.valid ? 'Yes' : (nc>0 ? 'Fixed' : 'Issues')}</div>
+            <div class="kpi-sub">${nc === 0 ? 'No clamping needed' : `${nc} entr${nc>1?'ies':'y'} clamped, max = ${mc.toFixed(5)}`}</div>
+        </div>
+        <div class="kpi-card" style="flex:1; min-width:160px;">
+            <div class="kpi-label">P₁ₘₒ Stochastic</div>
+            <div class="kpi-value" style="font-size:1.3rem;">${pmv.valid ? '✅ Yes' : '⚠️ Issues'}</div>
+            <div class="kpi-sub">${pmv.valid ? 'All entries in [0,1], rows ≈ 1' : pmv.issues[0]}</div>
+        </div>
+        <div class="kpi-card" style="flex:1; min-width:160px;">
+            <div class="kpi-label">Reconstruction Error</div>
+            <div class="kpi-value" style="font-size:1.3rem; color:${reconErr < 0.01 ? '#10b981' : '#f59e0b'}">${reconErr < 0.01 ? '✅' : '⚠️'} ${reconErr.toFixed(5)}</div>
+            <div class="kpi-sub">max |exp(Q·t) − P_obs|  ${reconErr < 0.01 ? '(good)' : '(>0.01)'}</div>
+        </div>
+    </div>`;
+
+    // Clamping explanation if needed
+    if (nc > 0) {
+        html += `<div style="background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.3); border-radius:8px; padding:0.85rem 1rem; margin-bottom:1rem; font-size:0.82rem; color:#a7f3d0;">
+            <strong>🔧 Embedding problem auto-corrected (Israel-Rosenthal-Wei 2001):</strong> The raw matrix logarithm produced ${nc} negative off-diagonal entr${nc>1?'ies':'y'} (max = ${mc.toFixed(6)}/month) in Q_raw. These were clamped to 0 and the diagonal renormalised to maintain row-sum = 0. This is the standard NICE DSU TSD-14 / CADTH approach and has a negligible impact on results (max adjustment = ${mc.toFixed(5)}/month). <span style="color:#10b981;">Highlighted cells (green) show clamped entries in Q below.</span>
+        </div>`;
     }
 
+    // Run self-test summary
+    const testResult = CTMCMath.selfTest();
+    html += `<details style="margin-bottom:1rem;">
+        <summary style="cursor:pointer; color:#38bdf8; font-size:0.85rem; font-weight:600;">🧪 Self-Test Suite — ${testResult.failed === 0 ? '✅ ' + testResult.passed + ' tests passed' : '❌ ' + testResult.failed + ' failures'}</summary>
+        <div style="background:rgba(0,0,0,0.4); border-radius:6px; padding:0.75rem; margin-top:0.5rem; font-family:monospace; font-size:0.75rem; color:#94a3b8; line-height:1.7; white-space:pre-wrap;">${testResult.log.join('\n')}</div>
+    </details>`;
+
+    html += matTable(Q, `Generator Q (clamped) = clamp(log(P_obs) / ${t})  [rates per month, green = clamped from negative]`, '#38bdf8', Qraw);
+    if (nc > 0) {
+        html += matTable(Qraw, 'Generator Q_raw (before clamping, red = negative off-diagonals)', '#f59e0b');
+    }
+    html += matTable(Pm, 'Derived Monthly Transition Matrix  P₁ₘₒₙₜₕ = exp(Q)  [used in model]', '#10b981');
+    if (Prec) {
+        html += matTable(Prec, `Reconstruction Check  exp(Q × ${t}) — should ≈ P_obs (recon error = ${reconErr.toFixed(5)})`, '#a855f7');
+    }
+
+    panel.innerHTML = html;
+}
+
+/* ─── Societal Tab ─── */
+function updateSocietalTab() {
+    const inputs = getInputs();
+    const model  = new PLPMarkovModel(inputs);
+    const res    = model.run();
+
+    const rate    = inputs.costCaregiverRate;
+    const hrsMild = inputs.durMild * 30.4375;
+    const hrsMod  = inputs.durMod  * 30.4375;
+    const hrsSev  = inputs.durSev  * 30.4375;
+
+    setText('socCgRate',   '£' + rate.toFixed(2) + '/hr');
+    setText('socHrsMild',  hrsMild.toFixed(1) + ' hrs/month');
+    setText('socHrsMod',   hrsMod.toFixed(1)  + ' hrs/month');
+    setText('socHrsSev',   hrsSev.toFixed(1)  + ' hrs/month');
+    setText('socCostMild', '£' + Math.round(hrsMild*rate).toLocaleString('en-GB') + '/month');
+    setText('socCostMod',  '£' + Math.round(hrsMod*rate).toLocaleString('en-GB') + '/month');
+    setText('socCostSev',  '£' + Math.round(hrsSev*rate).toLocaleString('en-GB') + '/month');
+
+    const N = inputs.cohortSize;
+    let totalSavings = 0;
+    for (let t = 0; t < 12; t++) {
+        const dMild = (res.vr.cohortHistory[t][1] - res.sc.cohortHistory[t][1]) * N;
+        const dMod  = (res.vr.cohortHistory[t][2] - res.sc.cohortHistory[t][2]) * N;
+        const dSev  = (res.vr.cohortHistory[t][3] - res.sc.cohortHistory[t][3]) * N;
+        totalSavings -= (dMild*hrsMild + dMod*hrsMod + dSev*hrsSev) * rate;
+    }
+
+    const totalVrCost = (inputs.vrCost + inputs.costOneOff) * N;
+    const sroi = totalVrCost > 0 && totalSavings > 0
+        ? (totalSavings / totalVrCost).toFixed(1) + 'x'
+        : (totalSavings <= 0 ? '0.0x' : '∞');
+
+    setText('societalRoi',    sroi + ' (caregiver savings vs device + setup cost)');
+    setText('societalRoi2',   sroi);   // duplicate for new tab layout
+    setText('sroiRow1',       sroi);   // SROI table row
+    setText('socTotalSavings', fmt(totalSavings));
+    setText('socTotalSavings2', fmt(totalSavings));
+    setText('socTotalVrCost',  fmt(totalVrCost));
+    setText('socNetSavings',   fmt(totalSavings - totalVrCost));
+
+    const tbody = document.getElementById('socCgTableBody');
+    if (tbody) {
+        const rows = [
+            ['Pain Free',          0,              0,                          0,                           0],
+            ['Mild PLP',           inputs.durMild, hrsMild,                    hrsMild*rate,                hrsMild*rate*12],
+            ['Moderate PLP',       inputs.durMod,  hrsMod,                     hrsMod*rate,                 hrsMod*rate*12],
+            ['Severe PLP',         inputs.durSev,  hrsSev,                     hrsSev*rate,                 hrsSev*rate*12],
+            ['Constant/Refractory',inputs.durConst,inputs.durConst*30.4375,    inputs.durConst*30.4375*rate, inputs.durConst*30.4375*rate*12],
+        ];
+        tbody.innerHTML = rows.map(r =>
+            `<tr><td>${r[0]}</td><td>${r[1]} hrs/day</td><td>${r[2].toFixed(1)} hrs</td><td>£${Math.round(r[3]).toLocaleString('en-GB')}</td><td>£${Math.round(r[4]).toLocaleString('en-GB')}</td></tr>`
+        ).join('');
+    }
+}
+
+/* ─── Threshold Modal ─── */
+window.openThresholdModal = function () {
+    const inputs    = getInputs();
+    const customWtp = vd('customWtp', 25000);
+    const model     = new PLPMarkovModel({ ...inputs, wtp: customWtp });
+    const res       = model.run();
+
+    setText('modalCsSaving',    fmt0(res.costSavingThreshold));
+    setText('modalCsEff',       fmt0(res.costEffectiveThreshold));
+    setText('modalWtpLabel',    `@ £${customWtp.toLocaleString('en-GB')}/QALY`);
+    setText('modalWtpDisplay',  '£' + customWtp.toLocaleString('en-GB'));
+
+    let status;
+    if (res.incCost < 0 && res.incQaly > 0)        status = '🌟 Dominant';
+    else if (!isFinite(res.icer) || res.incQaly<=0) status = 'Non-calculable';
+    else if (res.icer <= customWtp)                 status = '✅ Cost-Effective';
+    else                                            status = '⚠️ Above Threshold';
+    setText('modalStatus', status);
+
+    const modal = document.getElementById('thresholdModal');
+    if (modal) modal.style.setProperty('display','flex','important');
+};
+
+window.closeThresholdModal = function () {
+    const modal = document.getElementById('thresholdModal');
+    if (modal) modal.style.setProperty('display','none','important');
+};
+
+/* ─── CSV Export ─── */
+window.exportDataCsv = function () {
+    const inputs = getInputs();
+    const model  = new PLPMarkovModel(inputs);
+    const res    = model.run();
+
+    const rows = [
+        ['Parameter', 'Value'],
+        ['WTP Threshold (£/QALY)',      inputs.wtp],
+        ['VR Therapy Cost (£/patient)', inputs.vrCost],
+        ['One-off Setup Cost (£/patient)', inputs.costOneOff],
+        ['Total VR Cost (£/patient)',   inputs.vrCost + inputs.costOneOff],
+        ['VR Scenario Efficacy (%)',    inputs.painReduction],
+        ['CTMC Mode',                   inputs.useCTMC ? `Yes (t=${inputs.ctmcObsPeriod} months)` : 'No'],
+        ['Cohort Size (N)',             inputs.cohortSize],
+        [''],
+        ['Result', 'Value'],
+        ['Incremental Cost (ΔC) [£]',  res.incCost.toFixed(2)],
+        ['Incremental QALYs (ΔE)',      res.incQaly.toFixed(6)],
+        ['ICER (£/QALY)',               isFinite(res.icer) ? res.icer.toFixed(2) : 'Dominant'],
+        ['Net Monetary Benefit (£)',    res.nmb.toFixed(2)],
+        ['Cost-Saving Threshold (£)',   res.costSavingThreshold.toFixed(2)],
+        ['Cost-Effective Threshold (£)',res.costEffectiveThreshold.toFixed(2)],
+        [''],
+        ['Health State', 'Utility', 'Monthly Drug Cost (£)'],
+        ['Pain Free',    inputs.utilPf,   '0.00'],
+        ['Mild PLP',     inputs.utilMild, (inputs.costGabapentin*30.4375).toFixed(2)],
+        ['Moderate PLP', inputs.utilMod,  (inputs.costPregabalin*30.4375).toFixed(2)],
+        ['Severe PLP',   inputs.utilSev,  ((inputs.costAmitriptyline+inputs.costDuloxetine)*30.4375).toFixed(2)],
+        ['Death',        '0.00',          '0.00'],
+    ];
+
+    const csv = 'data:text/csv;charset=utf-8,' + rows.map(r => r.join(',')).join('\n');
+    const a   = document.createElement('a');
+    a.href     = encodeURI(csv);
+    a.download = 'UCLTouchRehab_PLP_HealthEcon.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+};
+
+/* ─── DOM Helpers ─── */
+function setText(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
+function colorEl(id, col) { const el = document.getElementById(id); if (el) el.style.color = col; }
+function setClass(el, cls) { if (el) el.className = cls; }
+
+/* ─── Boot ─── */
+document.addEventListener('DOMContentLoaded', () => {
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.font.family = "'Inter',system-ui,sans-serif";
+    wireAutoRefresh();
+    recalculateAll();
 });
