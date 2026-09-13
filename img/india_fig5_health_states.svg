@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 550" width="1000" height="550" style="background:#0b1329;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <text x="50" y="42" font-size="20" font-weight="800" fill="#f8fafc">Figure 5 — Health State Transitions Across Study Epochs</text>
+  <text x="50" y="65" font-size="12" font-weight="600" fill="#94a3b8">Proportion of Participants in Each Health State: Pain-Free (0), Mild (1–3), Moderate (4–6), Severe (7–10)</text>
+
+  <g transform="translate(0, 0)">
+    <!-- Y axis: 0% to 100%. height 350 (y=120 to 470) -->
+    <line x1="120" y1="470" x2="880" y2="470" stroke="#334155" stroke-width="1.5" />
+    <line x1="120" y1="382.5" x2="880" y2="382.5" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <line x1="120" y1="295" x2="880" y2="295" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <line x1="120" y1="207.5" x2="880" y2="207.5" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <line x1="120" y1="120" x2="880" y2="120" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+
+    <text x="105" y="474" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">0%</text>
+    <text x="105" y="386" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">25%</text>
+    <text x="105" y="299" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">50%</text>
+    <text x="105" y="211" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">75%</text>
+    <text x="105" y="124" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">100%</text>
+    <text x="65" y="295" text-anchor="middle" font-size="12" font-weight="700" fill="#cbd5e1" transform="rotate(-90, 65, 295)">Percentage of Cohort (%)</text>
+
+    <!-- Stacked Bars: width 110px. Centers: 220, 420, 620, 820 -->
+    <!-- Epoch 1: Baseline (cx=220, x=165)
+         PF: 12.5% (h=43.75, y=426.25)
+         Mild: 50.0% (h=175, y=251.25)
+         Mod: 12.5% (h=43.75, y=207.5)
+         Sev: 25.0% (h=87.5, y=120)
+    -->
+    <rect x="165" y="426.25" width="110" height="43.75" fill="#10b981" />
+    <text x="220" y="452" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">12.5%</text>
+
+    <rect x="165" y="251.25" width="110" height="175" fill="#38bdf8" />
+    <text x="220" y="342" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">50.0%</text>
+
+    <rect x="165" y="207.5" width="110" height="43.75" fill="#f59e0b" />
+    <text x="220" y="233" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">12.5%</text>
+
+    <rect x="165" y="120" width="110" height="87.5" fill="#ef4444" />
+    <text x="220" y="168" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">25.0%</text>
+
+    <text x="220" y="495" text-anchor="middle" font-size="12" font-weight="700" fill="#cbd5e1">Baseline</text>
+
+    <!-- Epoch 2: S10 Post (cx=420, x=365)
+         PF: 62.5% (h=218.75, y=251.25)
+         Mild: 25.0% (h=87.5, y=163.75)
+         Mod: 12.5% (h=43.75, y=120)
+         Sev: 0.0%
+    -->
+    <rect x="365" y="251.25" width="110" height="218.75" fill="#10b981" />
+    <text x="420" y="365" text-anchor="middle" font-size="13" font-weight="800" fill="#ffffff">62.5%</text>
+
+    <rect x="365" y="163.75" width="110" height="87.5" fill="#38bdf8" />
+    <text x="420" y="210" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">25.0%</text>
+
+    <rect x="365" y="120" width="110" height="43.75" fill="#f59e0b" />
+    <text x="420" y="146" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">12.5%</text>
+
+    <text x="420" y="495" text-anchor="middle" font-size="12" font-weight="700" fill="#10b981">Session 10 Post</text>
+
+    <!-- Epoch 3: FU1 6w (cx=620, x=565)
+         PF: 37.5% (h=131.25, y=338.75)
+         Mild: 50.0% (h=175, y=163.75)
+         Mod: 0%
+         Sev: 12.5% (h=43.75, y=120)
+    -->
+    <rect x="565" y="338.75" width="110" height="131.25" fill="#10b981" />
+    <text x="620" y="408" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">37.5%</text>
+
+    <rect x="565" y="163.75" width="110" height="175" fill="#38bdf8" />
+    <text x="620" y="255" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">50.0%</text>
+
+    <rect x="565" y="120" width="110" height="43.75" fill="#ef4444" />
+    <text x="620" y="146" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">12.5%</text>
+
+    <text x="620" y="495" text-anchor="middle" font-size="12" font-weight="700" fill="#06b6d4">Follow-Up 1 (6w)</text>
+
+    <!-- Epoch 4: FU2 12w (cx=820, x=765)
+         PF: 50.0% (h=175, y=295)
+         Mild: 12.5% (h=43.75, y=251.25)
+         Mod: 25.0% (h=87.5, y=163.75)
+         Sev: 12.5% (h=43.75, y=120)
+    -->
+    <rect x="765" y="295" width="110" height="175" fill="#10b981" />
+    <text x="820" y="385" text-anchor="middle" font-size="13" font-weight="800" fill="#ffffff">50.0%</text>
+
+    <rect x="765" y="251.25" width="110" height="43.75" fill="#38bdf8" />
+    <text x="820" y="277" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">12.5%</text>
+
+    <rect x="765" y="163.75" width="110" height="87.5" fill="#f59e0b" />
+    <text x="820" y="210" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">25.0%</text>
+
+    <rect x="765" y="120" width="110" height="43.75" fill="#ef4444" />
+    <text x="820" y="146" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">12.5%</text>
+
+    <text x="820" y="495" text-anchor="middle" font-size="12" font-weight="700" fill="#a855f7">Follow-Up 2 (12w)</text>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(230, 525)">
+    <rect x="0" y="0" width="18" height="12" rx="2" fill="#10b981" />
+    <text x="24" y="10" font-size="11" font-weight="700" fill="#cbd5e1">Pain-Free (0)</text>
+
+    <rect x="140" y="0" width="18" height="12" rx="2" fill="#38bdf8" />
+    <text x="164" y="10" font-size="11" font-weight="700" fill="#cbd5e1">Mild (1–3)</text>
+
+    <rect x="260" y="0" width="18" height="12" rx="2" fill="#f59e0b" />
+    <text x="284" y="10" font-size="11" font-weight="700" fill="#cbd5e1">Moderate (4–6)</text>
+
+    <rect x="410" y="0" width="18" height="12" rx="2" fill="#ef4444" />
+    <text x="434" y="10" font-size="11" font-weight="700" fill="#cbd5e1">Severe (7–10)</text>
+  </g>
+</svg>

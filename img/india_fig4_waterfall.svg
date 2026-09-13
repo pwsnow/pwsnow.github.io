@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 550" width="1000" height="550" style="background:#0b1329;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <text x="50" y="42" font-size="20" font-weight="800" fill="#f8fafc">Figure 4 — Individual Patient Waterfall Plot: Pain Change from Baseline</text>
+  <text x="50" y="65" font-size="12" font-weight="600" fill="#94a3b8">Change in NRS Pain Score (Baseline → Session 10 Post) for All Completers (N=8)</text>
+
+  <g transform="translate(0, 0)">
+    <!-- Zero Baseline at y=200 -->
+    <line x1="90" y1="200" x2="910" y2="200" stroke="#cbd5e1" stroke-width="2" />
+    <text x="75" y="204" text-anchor="end" font-size="12" font-weight="700" fill="#cbd5e1">0</text>
+
+    <!-- Grid -->
+    <line x1="90" y1="240" x2="910" y2="240" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <text x="75" y="244" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">−1</text>
+    <line x1="90" y1="280" x2="910" y2="280" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <text x="75" y="284" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">−2</text>
+    <line x1="90" y1="320" x2="910" y2="320" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <text x="75" y="324" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">−3</text>
+    <line x1="90" y1="360" x2="910" y2="360" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <text x="75" y="364" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">−4</text>
+    <line x1="90" y1="400" x2="910" y2="400" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <text x="75" y="404" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">−5</text>
+    <line x1="90" y1="440" x2="910" y2="440" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <text x="75" y="444" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">−6</text>
+    <line x1="90" y1="480" x2="910" y2="480" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <text x="75" y="484" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">−7</text>
+    <text x="35" y="340" text-anchor="middle" font-size="12" font-weight="700" fill="#cbd5e1" transform="rotate(-90, 35, 340)">NRS Change Score (Δ Points)</text>
+
+    <!-- Bars for each patient (width 65px) -->
+    <!-- TR02: -7 pts (y=200, h=280) -->
+    <rect x="120" y="200" width="65" height="280" rx="4" fill="#10b981" opacity="0.9" />
+    <text x="152" y="495" text-anchor="middle" font-size="12" font-weight="800" fill="#10b981">−7.0</text>
+    <text x="152" y="175" text-anchor="middle" font-size="12" font-weight="700" fill="#f8fafc">TR02</text>
+    <text x="152" y="190" text-anchor="middle" font-size="10" font-weight="600" fill="#10b981">−100%</text>
+
+    <!-- TR03: -3 pts (y=200, h=120) -->
+    <rect x="220" y="200" width="65" height="120" rx="4" fill="#10b981" opacity="0.9" />
+    <text x="252" y="335" text-anchor="middle" font-size="12" font-weight="800" fill="#10b981">−3.0</text>
+    <text x="252" y="175" text-anchor="middle" font-size="12" font-weight="700" fill="#f8fafc">TR03</text>
+    <text x="252" y="190" text-anchor="middle" font-size="10" font-weight="600" fill="#10b981">−100%</text>
+
+    <!-- TR06: -3 pts (y=200, h=120) -->
+    <rect x="320" y="200" width="65" height="120" rx="4" fill="#10b981" opacity="0.9" />
+    <text x="352" y="335" text-anchor="middle" font-size="12" font-weight="800" fill="#10b981">−3.0</text>
+    <text x="352" y="175" text-anchor="middle" font-size="12" font-weight="700" fill="#f8fafc">TR06</text>
+    <text x="352" y="190" text-anchor="middle" font-size="10" font-weight="600" fill="#10b981">−75%</text>
+
+    <!-- TR01: -1 pt (y=200, h=40) -->
+    <rect x="420" y="200" width="65" height="40" rx="4" fill="#10b981" opacity="0.9" />
+    <text x="452" y="255" text-anchor="middle" font-size="12" font-weight="800" fill="#10b981">−1.0</text>
+    <text x="452" y="175" text-anchor="middle" font-size="12" font-weight="700" fill="#f8fafc">TR01</text>
+    <text x="452" y="190" text-anchor="middle" font-size="10" font-weight="600" fill="#10b981">−100%</text>
+
+    <!-- TR07: -1 pt (y=200, h=40) -->
+    <rect x="520" y="200" width="65" height="40" rx="4" fill="#10b981" opacity="0.9" />
+    <text x="552" y="255" text-anchor="middle" font-size="12" font-weight="800" fill="#10b981">−1.0</text>
+    <text x="552" y="175" text-anchor="middle" font-size="12" font-weight="700" fill="#f8fafc">TR07</text>
+    <text x="552" y="190" text-anchor="middle" font-size="10" font-weight="600" fill="#10b981">−14%</text>
+
+    <!-- TR08: -1 pt (y=200, h=40) -->
+    <rect x="620" y="200" width="65" height="40" rx="4" fill="#10b981" opacity="0.9" />
+    <text x="652" y="255" text-anchor="middle" font-size="12" font-weight="800" fill="#10b981">−1.0</text>
+    <text x="652" y="175" text-anchor="middle" font-size="12" font-weight="700" fill="#f8fafc">TR08</text>
+    <text x="652" y="190" text-anchor="middle" font-size="10" font-weight="600" fill="#10b981">−100%</text>
+
+    <!-- TR09: -1 pt (y=200, h=40) -->
+    <rect x="720" y="200" width="65" height="40" rx="4" fill="#10b981" opacity="0.9" />
+    <text x="752" y="255" text-anchor="middle" font-size="12" font-weight="800" fill="#10b981">−1.0</text>
+    <text x="752" y="175" text-anchor="middle" font-size="12" font-weight="700" fill="#f8fafc">TR09</text>
+    <text x="752" y="190" text-anchor="middle" font-size="10" font-weight="600" fill="#10b981">−50%</text>
+
+    <!-- TR05: 0 pt (y=200, h=4) -->
+    <rect x="820" y="198" width="65" height="4" rx="2" fill="#64748b" opacity="0.9" />
+    <text x="852" y="220" text-anchor="middle" font-size="12" font-weight="800" fill="#94a3b8">0.0</text>
+    <text x="852" y="175" text-anchor="middle" font-size="12" font-weight="700" fill="#f8fafc">TR05</text>
+    <text x="852" y="190" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">0% (0→0)</text>
+  </g>
+</svg>

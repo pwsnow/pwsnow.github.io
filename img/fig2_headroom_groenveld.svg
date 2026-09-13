@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 800" width="1100" height="800" style="background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <!-- Title & Subtitle (Groenveld Style) -->
+  <text x="550" y="45" text-anchor="middle" font-size="22" font-weight="800" fill="#0f172a">Headroom Analysis: Maximum Viable Intervention Price vs. VR Efficacy</text>
+  <text x="550" y="70" text-anchor="middle" font-size="13" font-weight="600" fill="#64748b">Early Health-Economic Appraisal Framework (Adapted from Groenveld et al. 2025, Figure 2)</text>
+
+  <!-- Plot Area: x=140 to 980 (width 840), y=110 to 650 (height 540) -->
+  <g transform="translate(140, 110)">
+    
+    <!-- Shaded Headroom Region under £25k Curve -->
+    <polygon points="0,540 0,540 840,0 840,540" fill="#e0e7ff" opacity="0.45"/>
+    <polygon points="0,540 0,540 840,372 840,540" fill="#d1fae5" opacity="0.5"/>
+
+    <!-- Grid Lines (Y-Axis: £0 to £12,000) -->
+    <!-- y=540 is £0, y=450 is £2,000, y=360 is £4,000, y=270 is £6,000, y=180 is £8,000, y=90 is £10,000, y=0 is £12,000 -->
+    <line x1="0" y1="540" x2="840" y2="540" stroke="#cbd5e1" stroke-width="1.5"/>
+    <line x1="0" y1="450" x2="840" y2="450" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="0" y1="360" x2="840" y2="360" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="0" y1="270" x2="840" y2="270" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="0" y1="180" x2="840" y2="180" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="0" y1="90"  x2="840" y2="90"  stroke="#f1f5f9" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="0" y1="0"   x2="840" y2="0"   stroke="#f1f5f9" stroke-width="1" stroke-dasharray="4,4"/>
+
+    <!-- Y-Axis Labels -->
+    <text x="-15" y="544" text-anchor="end" font-size="11" font-weight="600" fill="#64748b">£0</text>
+    <text x="-15" y="454" text-anchor="end" font-size="11" font-weight="600" fill="#64748b">£2,000</text>
+    <text x="-15" y="364" text-anchor="end" font-size="11" font-weight="600" fill="#64748b">£4,000</text>
+    <text x="-15" y="274" text-anchor="end" font-size="11" font-weight="600" fill="#64748b">£6,000</text>
+    <text x="-15" y="184" text-anchor="end" font-size="11" font-weight="600" fill="#64748b">£8,000</text>
+    <text x="-15" y="94"  text-anchor="end" font-size="11" font-weight="600" fill="#64748b">£10,000</text>
+    <text x="-15" y="4"   text-anchor="end" font-size="11" font-weight="600" fill="#64748b">£12,000</text>
+    <text x="-65" y="270" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b" transform="rotate(-90, -65, 270)">Maximum Viable Intervention Price (£/patient)</text>
+
+    <!-- Grid Lines (X-Axis: Efficacy 0% to 100%) -->
+    <!-- x=0 is 0%, x=168 is 20%, x=336 is 40%, x=420 is 50%, x=504 is 60%, x=672 is 80%, x=840 is 100% -->
+    <line x1="0"   y1="0" x2="0"   y2="540" stroke="#cbd5e1" stroke-width="1.5"/>
+    <line x1="168" y1="0" x2="168" y2="540" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="336" y1="0" x2="336" y2="540" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="504" y1="0" x2="504" y2="540" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="672" y1="0" x2="672" y2="540" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="840" y1="0" x2="840" y2="540" stroke="#cbd5e1" stroke-width="1.5"/>
+
+    <!-- X-Axis Labels -->
+    <text x="0"   y="565" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b">0%</text>
+    <text x="168" y="565" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b">20%</text>
+    <text x="336" y="565" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b">40%</text>
+    <text x="420" y="565" text-anchor="middle" font-size="12" font-weight="800" fill="#0284c7">50% (Base)</text>
+    <text x="504" y="565" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b">60%</text>
+    <text x="672" y="565" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b">80%</text>
+    <text x="840" y="565" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b">100%</text>
+    <text x="420" y="598" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b">VR Therapy Efficacy (Pain Severity Reduction, %)</text>
+
+    <!-- Vertical Line at Base Efficacy (50%) -->
+    <line x1="420" y1="0" x2="420" y2="540" stroke="#0284c7" stroke-width="2" stroke-dasharray="6,6"/>
+
+    <!-- Horizontal Line at Baseline Device Cost (£40.55) -->
+    <!-- £40.55 -> y = 540 - (40.55/12000)*540 = 538.18 -->
+    <line x1="0" y1="538.2" x2="840" y2="538.2" stroke="#dc2626" stroke-width="2"/>
+    <text x="10" y="530" font-size="11" font-weight="800" fill="#dc2626">Baseline Device Price (£40.55)</text>
+
+    <!-- CURVE 1: Cost-Saving Ceiling Line (CS_max) -->
+    <!-- At 0%: £0 (y=540); At 50%: £776.50 (y=505.05); At 100%: £1,553.00 (y=470.1) -->
+    <line x1="0" y1="540" x2="840" y2="470.1" stroke="#10b981" stroke-width="3"/>
+    <circle cx="420" cy="505.05" r="5" fill="#10b981" stroke="#ffffff" stroke-width="2"/>
+
+    <!-- CURVE 2: CE @ £20k/QALY Line -->
+    <!-- At 0%: £0 (y=540); At 50%: £4,486.65 (y=338.1); At 100%: £8,973.30 (y=136.2) -->
+    <line x1="0" y1="540" x2="840" y2="136.2" stroke="#06b6d4" stroke-width="3"/>
+    <circle cx="420" cy="338.1" r="5" fill="#06b6d4" stroke="#ffffff" stroke-width="2"/>
+
+    <!-- CURVE 3: CE @ £25k/QALY Line (NICE Base Case) -->
+    <!-- At 0%: £0 (y=540); At 50%: £5,414.18 (y=296.36); At 100%: £10,828.36 (y=52.7) -->
+    <line x1="0" y1="540" x2="840" y2="52.7" stroke="#6366f1" stroke-width="3.5"/>
+    <circle cx="420" cy="296.36" r="6" fill="#6366f1" stroke="#ffffff" stroke-width="2.5"/>
+
+    <!-- CURVE 4: CE @ £35k/QALY Line -->
+    <!-- At 0%: £0 (y=540); At 50%: £7,269.26 (y=212.88); At 100%: £14,538.52 (y=-114) -->
+    <line x1="0" y1="540" x2="693.6" y2="0" stroke="#f59e0b" stroke-width="3" stroke-dasharray="6,4"/>
+    <circle cx="420" cy="212.88" r="5" fill="#f59e0b" stroke="#ffffff" stroke-width="2"/>
+
+    <!-- Callout Box at Baseline Efficacy (50%) -->
+    <!-- Baseline 50% points: CS=£776.50, CE20k=£4,486.65, CE25k=£5,414.18, CE35k=£7,269.26 -->
+    <g transform="translate(435, 170)">
+      <rect x="0" y="0" width="280" height="150" rx="8" fill="#ffffff" stroke="#6366f1" stroke-width="2" opacity="0.95" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.1))"/>
+      <text x="140" y="24" text-anchor="middle" font-size="12" font-weight="800" fill="#1e293b">Headroom at 50% Baseline Efficacy:</text>
+      
+      <text x="15" y="50" font-size="11" font-weight="700" fill="#10b981">• Cost-Saving Limit:</text>
+      <text x="265" y="50" text-anchor="end" font-size="11" font-weight="800" fill="#065f46">£776.50 / pt</text>
+      
+      <text x="15" y="73" font-size="11" font-weight="700" fill="#06b6d4">• CE @ £20k Threshold:</text>
+      <text x="265" y="73" text-anchor="end" font-size="11" font-weight="800" fill="#0e7490">£4,486.65 / pt</text>
+      
+      <text x="15" y="96" font-size="11" font-weight="800" fill="#6366f1">• CE @ £25k (NICE Base):</text>
+      <text x="265" y="96" text-anchor="end" font-size="11" font-weight="800" fill="#3730a3">£5,414.18 / pt</text>
+
+      <text x="15" y="119" font-size="11" font-weight="700" fill="#f59e0b">• CE @ £35k Upper Band:</text>
+      <text x="265" y="119" text-anchor="end" font-size="11" font-weight="800" fill="#92400e">£7,269.26 / pt</text>
+
+      <line x1="15" y1="130" x2="265" y2="130" stroke="#e2e8f0" stroke-width="1"/>
+      <text x="140" y="143" text-anchor="middle" font-size="10" font-weight="800" fill="#4338ca">Commercial Headroom = £5,373.63/pt</text>
+    </g>
+
+    <!-- Legend Box (Groenveld Style Top-Left) -->
+    <g transform="translate(20, 20)">
+      <rect x="0" y="0" width="290" height="135" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" opacity="0.95"/>
+      <text x="15" y="20" font-size="11" font-weight="800" fill="#0f172a">Threshold Curves (Willingness-to-Pay):</text>
+      
+      <line x1="15" y1="40" x2="45" y2="40" stroke="#10b981" stroke-width="3"/>
+      <text x="55" y="44" font-size="10.5" font-weight="700" fill="#065f46">Cost-Saving Ceiling (Net Cost = £0)</text>
+
+      <line x1="15" y1="62" x2="45" y2="62" stroke="#06b6d4" stroke-width="3"/>
+      <text x="55" y="66" font-size="10.5" font-weight="700" fill="#0e7490">CE Threshold @ £20,000 / QALY</text>
+
+      <line x1="15" y1="84" x2="45" y2="84" stroke="#6366f1" stroke-width="3.5"/>
+      <text x="55" y="88" font-size="10.5" font-weight="800" fill="#3730a3">CE Threshold @ £25,000 / QALY (NICE)</text>
+
+      <line x1="15" y1="106" x2="45" y2="106" stroke="#f59e0b" stroke-width="3" stroke-dasharray="5,3"/>
+      <text x="55" y="110" font-size="10.5" font-weight="700" fill="#92400e">CE Threshold @ £35,000 / QALY (Upper)</text>
+    </g>
+  </g>
+</svg>

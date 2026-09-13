@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="1000" height="600" style="background:#0b1329;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <text x="50" y="42" font-size="20" font-weight="800" fill="#f8fafc">Figure 6 — Cross-Study Comparison: UK PhD Study vs. India Clinical Cohort</text>
+  <text x="50" y="65" font-size="12" font-weight="600" fill="#94a3b8">Benchmarking Pain Reduction Efficacy, Clinical Responders (MCID), and Complete Remission</text>
+
+  <g transform="translate(0, 0)">
+    <!-- 4 Side-by-side metric comparison cards / bars -->
+    <!-- Metric 1: Mean % Pain Reduction (Post-treatment) -->
+    <rect x="60" y="110" width="410" height="200" rx="8" fill="#0f172a" stroke="#1e293b" stroke-width="1.5" />
+    <text x="80" y="140" font-size="14" font-weight="800" fill="#f8fafc">1. Mean Pain Reduction (% from Baseline)</text>
+    
+    <text x="80" y="185" font-size="11" font-weight="600" fill="#38bdf8">UK Control (VR only, n=6): −33.3%</text>
+    <rect x="80" y="195" width="133" height="18" rx="3" fill="#38bdf8" />
+
+    <text x="80" y="235" font-size="11" font-weight="600" fill="#a855f7">UK Experimental (VR+Haptic, n=6): −60.4%</text>
+    <rect x="80" y="245" width="241" height="18" rx="3" fill="#a855f7" />
+
+    <text x="80" y="285" font-size="11" font-weight="700" fill="#10b981">India Clinical Cohort (VR+Robotics, n=8): −68.0%</text>
+    <rect x="80" y="292" width="272" height="18" rx="3" fill="#10b981" />
+
+    <!-- Metric 2: MCID Clinical Responders (>=30%) -->
+    <rect x="520" y="110" width="420" height="200" rx="8" fill="#0f172a" stroke="#1e293b" stroke-width="1.5" />
+    <text x="540" y="140" font-size="14" font-weight="800" fill="#f8fafc">2. Clinical Responders (MCID ≥ 30% Relief)</text>
+
+    <text x="540" y="185" font-size="11" font-weight="600" fill="#38bdf8">UK Control: 50.0% (3/6)</text>
+    <rect x="540" y="195" width="175" height="18" rx="3" fill="#38bdf8" />
+
+    <text x="540" y="235" font-size="11" font-weight="600" fill="#a855f7">UK Experimental: 83.3% (5/6)</text>
+    <rect x="540" y="245" width="291" height="18" rx="3" fill="#a855f7" />
+
+    <text x="540" y="285" font-size="11" font-weight="700" fill="#10b981">India Clinical Cohort: 87.5% (7/8)</text>
+    <rect x="540" y="292" width="306" height="18" rx="3" fill="#10b981" />
+
+    <!-- Metric 3: Pain-Free Rate (Complete Remission) -->
+    <rect x="60" y="340" width="410" height="200" rx="8" fill="#0f172a" stroke="#1e293b" stroke-width="1.5" />
+    <text x="80" y="370" font-size="14" font-weight="800" fill="#f8fafc">3. Complete Remission (Pain-Free at S10/Post)</text>
+
+    <text x="80" y="415" font-size="11" font-weight="600" fill="#38bdf8">UK Control: 16.7% (1/6)</text>
+    <rect x="80" y="425" width="58" height="18" rx="3" fill="#38bdf8" />
+
+    <text x="80" y="465" font-size="11" font-weight="600" fill="#a855f7">UK Experimental: 33.3% (2/6)</text>
+    <rect x="80" y="475" width="116" height="18" rx="3" fill="#a855f7" />
+
+    <text x="80" y="515" font-size="11" font-weight="700" fill="#10b981">India Clinical Cohort: 62.5% (5/8)</text>
+    <rect x="80" y="522" width="218" height="18" rx="3" fill="#10b981" />
+
+    <!-- Metric 4: Protocol & Clinical Setting Summary -->
+    <rect x="520" y="340" width="420" height="200" rx="8" fill="#0f172a" stroke="#1e293b" stroke-width="1.5" />
+    <text x="540" y="370" font-size="14" font-weight="800" fill="#f8fafc">4. Clinical Protocol &amp; Feasibility Insights</text>
+
+    <text x="540" y="405" font-size="11" font-weight="700" fill="#cbd5e1">• Protocol Intensity:</text>
+    <text x="540" y="422" font-size="10.5" fill="#94a3b8">  India: 10 daily sessions over 2 wks (high-frequency condensed)</text>
+    <text x="540" y="437" font-size="10.5" fill="#94a3b8">  UK: 9 sessions over 3 wks (3 sessions/wk distributed)</text>
+
+    <text x="540" y="462" font-size="11" font-weight="700" fill="#cbd5e1">• Patient Demographics &amp; Etiology:</text>
+    <text x="540" y="479" font-size="10.5" fill="#94a3b8">  India: Younger working-age cohort (mean 31.2y, 67% machine cut)</text>
+    <text x="540" y="494" font-size="10.5" fill="#94a3b8">  UK: Mixed chronic amputation cohort (vascular &amp; trauma)</text>
+
+    <text x="540" y="520" font-size="11" font-weight="700" fill="#10b981">✓ High replication across international clinical cohorts</text>
+  </g>
+</svg>

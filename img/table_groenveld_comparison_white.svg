@@ -1,0 +1,180 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1840 968" width="1840" height="968" style="background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <defs>
+    <filter id="subtleShadow" x="-1%" y="-1%" width="102%" height="102%">
+      <feDropShadow dx="0" dy="1" stdDeviation="3" flood-color="#000000" flood-opacity="0.05" />
+    </filter>
+  </defs>
+
+  <!-- Solid Crisp White Background -->
+  <rect width="1840" height="968" fill="#ffffff" />
+
+  <!-- Outer Border Container -->
+  <rect x="40" y="40" width="1760" height="888" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2" filter="url(#subtleShadow)" />
+
+  <!-- ═══════════ TABLE HEADER ROW ═══════════ -->
+  <rect x="40" y="40" width="1760" height="52" rx="8" fill="#f1f5f9" />
+  <rect x="40" y="82" width="1760" height="10" fill="#f1f5f9" />
+  <line x1="40" y1="92" x2="1800" y2="92" stroke="#cbd5e1" stroke-width="1.5" />
+
+  <!-- Column Header Labels -->
+  <text x="58" y="72" font-size="14" font-weight="900" fill="#0f172a" letter-spacing="-0.01em;">Dimension</text>
+  <text x="288" y="72" font-size="14" font-weight="900" fill="#0369a1" letter-spacing="-0.01em;">Groenveld et al. (2025)</text>
+  <text x="728" y="72" font-size="14" font-weight="900" fill="#047857" letter-spacing="-0.01em;">UCLTouchRehab Model (This Study)</text>
+  <text x="1218" y="72" font-size="14" font-weight="900" fill="#334155" letter-spacing="-0.01em;">Methodological &amp; Strategic Significance</text>
+
+  <!-- Vertical Divider Lines in Header -->
+  <line x1="270" y1="40" x2="270" y2="92" stroke="#cbd5e1" stroke-width="1" />
+  <line x1="710" y1="40" x2="710" y2="92" stroke="#cbd5e1" stroke-width="1" />
+  <line x1="1200" y1="40" x2="1200" y2="92" stroke="#cbd5e1" stroke-width="1" />
+
+  <!-- ═══════════ TABLE ROWS ═══════════ -->
+  <!-- Row 1 -->
+  <rect x="40" y="92" width="1760" height="68" fill="#ffffff" />
+  <text x="58" y="117" font-size="13.5" font-weight="800" fill="#0f172a">Clinical Indication</text>
+  <text x="288" y="117" font-size="13" font-weight="500" fill="#334155">Postoperative surgical pain (elective</text>
+  <text x="288" y="139" font-size="13" font-weight="500" fill="#334155">abdominal / colorectal surgery)</text>
+  <text x="728" y="117" font-size="13" font-weight="500" fill="#0f172a">Phantom Limb Pain (PLP) in upper-limb</text>
+  <text x="728" y="139" font-size="13" font-weight="500" fill="#0f172a">amputees</text>
+  <text x="1218" y="117" font-size="12.8" font-weight="500" fill="#334155">Shifts from acute, transient surgical pain to a</text>
+  <text x="1218" y="139" font-size="12.8" font-weight="500" fill="#334155">chronic, lifelong neuropathic condition.</text>
+  <line x1="40" y1="160" x2="1800" y2="160" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="270" y1="92" x2="270" y2="160" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="710" y1="92" x2="710" y2="160" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="1200" y1="92" x2="1200" y2="160" stroke="#e2e8f0" stroke-width="1" />
+  <!-- Row 2 -->
+  <rect x="40" y="160" width="1760" height="68" fill="#f8fafc" />
+  <text x="58" y="185" font-size="13.5" font-weight="800" fill="#0f172a">Technology Evaluated</text>
+  <text x="288" y="185" font-size="13" font-weight="500" fill="#334155">Distraction-based visual VR (SyncVR</text>
+  <text x="288" y="207" font-size="13" font-weight="500" fill="#334155">software on Meta Quest)</text>
+  <text x="728" y="185" font-size="13" font-weight="500" fill="#0f172a">Immersive VR + Synchronized Robotic</text>
+  <text x="728" y="207" font-size="13" font-weight="500" fill="#0f172a">Haptics (UCLTouchRehab)</text>
+  <text x="1218" y="185" font-size="12.8" font-weight="500" fill="#334155">Adds the active robotic ingredient (sensorimotor</text>
+  <text x="1218" y="207" font-size="12.8" font-weight="500" fill="#334155">feedback), inducing targeted cortical remapping.</text>
+  <line x1="40" y1="228" x2="1800" y2="228" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="270" y1="160" x2="270" y2="228" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="710" y1="160" x2="710" y2="228" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="1200" y1="160" x2="1200" y2="228" stroke="#e2e8f0" stroke-width="1" />
+  <!-- Row 3 -->
+  <rect x="40" y="228" width="1760" height="68" fill="#ffffff" />
+  <text x="58" y="253" font-size="13.5" font-weight="800" fill="#0f172a">Patient Demographics</text>
+  <text x="288" y="253" font-size="13" font-weight="500" fill="#334155">Predominantly elderly / retired (≥70</text>
+  <text x="288" y="275" font-size="13" font-weight="500" fill="#334155">yrs); productivity excluded</text>
+  <text x="728" y="253" font-size="13" font-weight="500" fill="#0f172a">Working-age adults (~45 yrs); productivity</text>
+  <text x="728" y="275" font-size="13" font-weight="500" fill="#0f172a">&amp; absenteeism included</text>
+  <text x="1218" y="253" font-size="12.8" font-weight="500" fill="#334155">Captures massive economic productivity gains via the</text>
+  <text x="1218" y="275" font-size="12.8" font-weight="500" fill="#334155">Friction Cost Method (68-day friction window).</text>
+  <line x1="40" y1="296" x2="1800" y2="296" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="270" y1="228" x2="270" y2="296" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="710" y1="228" x2="710" y2="296" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="1200" y1="228" x2="1200" y2="296" stroke="#e2e8f0" stroke-width="1" />
+  <!-- Row 4 -->
+  <rect x="40" y="296" width="1760" height="68" fill="#f8fafc" />
+  <text x="58" y="321" font-size="13.5" font-weight="800" fill="#0f172a">Payer &amp; Setting</text>
+  <text x="288" y="321" font-size="13" font-weight="500" fill="#334155">Netherlands healthcare / Dutch DBC</text>
+  <text x="288" y="343" font-size="13" font-weight="500" fill="#334155">tariffs (€, 2023)</text>
+  <text x="728" y="321" font-size="13" font-weight="500" fill="#0f172a">UK National Health Service (NHS) / PSSRU &amp;</text>
+  <text x="728" y="343" font-size="13" font-weight="500" fill="#0f172a">HES (£, 2025/26)</text>
+  <text x="1218" y="321" font-size="12.8" font-weight="500" fill="#334155">Aligns with NICE Reference Case (PMG36) and UK</text>
+  <text x="1218" y="343" font-size="12.8" font-weight="500" fill="#334155">Integrated Care Board (ICB) commissioning.</text>
+  <line x1="40" y1="364" x2="1800" y2="364" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="270" y1="296" x2="270" y2="364" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="710" y1="296" x2="710" y2="364" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="1200" y1="296" x2="1200" y2="364" stroke="#e2e8f0" stroke-width="1" />
+  <!-- Row 5 -->
+  <rect x="40" y="364" width="1760" height="68" fill="#ffffff" />
+  <text x="58" y="389" font-size="13.5" font-weight="800" fill="#0f172a">Health States</text>
+  <text x="288" y="389" font-size="13" font-weight="500" fill="#334155">5 states: Pain-Free, Non-Opioid,</text>
+  <text x="288" y="411" font-size="13" font-weight="500" fill="#334155">Opioid, Chronic Pain (CPSP), Death</text>
+  <text x="728" y="389" font-size="13" font-weight="500" fill="#0f172a">5 states: Pain-Free, Mild PLP, Moderate</text>
+  <text x="728" y="411" font-size="13" font-weight="500" fill="#0f172a">PLP, Severe PLP, Death</text>
+  <text x="1218" y="389" font-size="12.8" font-weight="500" fill="#334155">Categorized by clinically validated NRS / McGill PPI</text>
+  <text x="1218" y="411" font-size="12.8" font-weight="500" fill="#334155">severity levels, directly mapping to NHS care tiers.</text>
+  <line x1="40" y1="432" x2="1800" y2="432" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="270" y1="364" x2="270" y2="432" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="710" y1="364" x2="710" y2="432" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="1200" y1="364" x2="1200" y2="432" stroke="#e2e8f0" stroke-width="1" />
+  <!-- Row 6 -->
+  <rect x="40" y="432" width="1760" height="68" fill="#f8fafc" />
+  <text x="58" y="457" font-size="13.5" font-weight="800" fill="#0f172a">Baseline Severity</text>
+  <text x="288" y="457" font-size="13" font-weight="500" fill="#334155">Broad surgical cohort (many</text>
+  <text x="288" y="479" font-size="13" font-weight="500" fill="#334155">mild/moderate patients)</text>
+  <text x="728" y="457" font-size="13" font-weight="500" fill="#0f172a">High severity: 60% Moderate, 40% Severe</text>
+  <text x="728" y="479" font-size="13" font-weight="500" fill="#0f172a">PLP</text>
+  <text x="1218" y="457" font-size="12.8" font-weight="500" fill="#334155">Reflects severe neurorehab referral profile; creates</text>
+  <text x="1218" y="479" font-size="12.8" font-weight="500" fill="#334155">higher downstream cost-offset potential.</text>
+  <line x1="40" y1="500" x2="1800" y2="500" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="270" y1="432" x2="270" y2="500" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="710" y1="432" x2="710" y2="500" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="1200" y1="432" x2="1200" y2="500" stroke="#e2e8f0" stroke-width="1" />
+  <!-- Row 7 -->
+  <rect x="40" y="500" width="1760" height="68" fill="#ffffff" />
+  <text x="58" y="525" font-size="13.5" font-weight="800" fill="#0f172a">Model Engine</text>
+  <text x="288" y="525" font-size="13" font-weight="500" fill="#334155">Static discrete-time Markov model</text>
+  <text x="288" y="547" font-size="13" font-weight="500" fill="#334155">(Microsoft Excel)</text>
+  <text x="728" y="525" font-size="13" font-weight="800" fill="#0f172a">Dual Engine: Markov Cohort +</text>
+  <text x="728" y="547" font-size="13" font-weight="500" fill="#0f172a">Continuous-Time Markov Chain (CTMC)</text>
+  <text x="1218" y="525" font-size="12.8" font-weight="500" fill="#334155">Uses matrix logarithms to eliminate cycle-length</text>
+  <text x="1218" y="547" font-size="12.8" font-weight="500" fill="#334155">bias per NICE DSU Technical Support Document 14.</text>
+  <line x1="40" y1="568" x2="1800" y2="568" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="270" y1="500" x2="270" y2="568" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="710" y1="500" x2="710" y2="568" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="1200" y1="500" x2="1200" y2="568" stroke="#e2e8f0" stroke-width="1" />
+  <!-- Row 8 -->
+  <rect x="40" y="568" width="1760" height="68" fill="#f8fafc" />
+  <text x="58" y="593" font-size="13.5" font-weight="800" fill="#0f172a">Discounting</text>
+  <text x="288" y="593" font-size="13" font-weight="500" fill="#334155">None (justified by ≤12-month horizon)</text>
+  <text x="728" y="593" font-size="13" font-weight="500" fill="#0f172a">3.5% / year on both costs &amp; QALYs (monthly</text>
+  <text x="728" y="615" font-size="13" font-weight="500" fill="#0f172a">compounding)</text>
+  <text x="1218" y="593" font-size="12.8" font-weight="500" fill="#334155">Complies with formal NICE methodological standards</text>
+  <text x="1218" y="615" font-size="12.8" font-weight="500" fill="#334155">(Treasury Green Book).</text>
+  <line x1="40" y1="636" x2="1800" y2="636" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="270" y1="568" x2="270" y2="636" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="710" y1="568" x2="710" y2="636" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="1200" y1="568" x2="1200" y2="636" stroke="#e2e8f0" stroke-width="1" />
+  <!-- Row 9 -->
+  <rect x="40" y="636" width="1760" height="90" fill="#ffffff" />
+  <text x="58" y="661" font-size="13.5" font-weight="800" fill="#0f172a">Primary Economic</text>
+  <text x="58" y="683" font-size="13.5" font-weight="800" fill="#0f172a">Perspective</text>
+  <text x="288" y="661" font-size="13" font-weight="500" fill="#334155">Dutch Societal (healthcare + formal</text>
+  <text x="288" y="683" font-size="13" font-weight="500" fill="#334155">homecare)</text>
+  <text x="728" y="661" font-size="13" font-weight="500" fill="#0f172a">Primary: NHS Payer</text>
+  <text x="728" y="683" font-size="13" font-weight="500" fill="#0f172a">(Supplementary: Full Societal)</text>
+  <text x="1218" y="661" font-size="12.8" font-weight="500" fill="#334155">Meets NICE STA/EVA payer requirements while</text>
+  <text x="1218" y="683" font-size="12.8" font-weight="500" fill="#334155">quantifying caregiver &amp; societal return on</text>
+  <text x="1218" y="705" font-size="12.8" font-weight="500" fill="#334155">investment.</text>
+  <line x1="40" y1="726" x2="1800" y2="726" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="270" y1="636" x2="270" y2="726" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="710" y1="636" x2="710" y2="726" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="1200" y1="636" x2="1200" y2="726" stroke="#e2e8f0" stroke-width="1" />
+  <!-- Row 10 -->
+  <rect x="40" y="726" width="1760" height="90" fill="#f8fafc" />
+  <text x="58" y="751" font-size="13.5" font-weight="800" fill="#0f172a">Efficacy Thresholds</text>
+  <text x="288" y="751" font-size="13" font-weight="500" fill="#334155">• 2.8% opioid reduction →</text>
+  <text x="288" y="773" font-size="13" font-weight="500" fill="#334155">Cost-Effective</text>
+  <text x="288" y="795" font-size="13" font-weight="500" fill="#334155">• 6.5% opioid reduction → Cost-Saving</text>
+  <text x="728" y="751" font-size="13" font-weight="500" fill="#047857">• ~0.5% pain shift → Cost-Effective</text>
+  <text x="728" y="773" font-size="13" font-weight="500" fill="#047857">• ~0.6% pain shift → Cost-Saving</text>
+  <text x="1218" y="751" font-size="12.8" font-weight="500" fill="#334155">Lower thresholds due to the high cost of</text>
+  <text x="1218" y="773" font-size="12.8" font-weight="500" fill="#334155">undertreated severe PLP; observed feasibility trial</text>
+  <text x="1218" y="795" font-size="12.8" font-weight="500" fill="#334155">efficacy (50–72%) easily dominates.</text>
+  <line x1="40" y1="816" x2="1800" y2="816" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="270" y1="726" x2="270" y2="816" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="710" y1="726" x2="710" y2="816" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="1200" y1="726" x2="1200" y2="816" stroke="#e2e8f0" stroke-width="1" />
+  <!-- Row 11 -->
+  <rect x="40" y="816" width="1760" height="112" fill="#ffffff" />
+  <text x="58" y="841" font-size="13.5" font-weight="800" fill="#0f172a">Advanced Extensions</text>
+  <text x="288" y="841" font-size="13" font-weight="500" fill="#334155">Basic One-Way Sensitivity Analysis</text>
+  <text x="288" y="863" font-size="13" font-weight="500" fill="#334155">(DSA)</text>
+  <text x="728" y="841" font-size="13" font-weight="500" fill="#0f172a">• Value of Information (EVPI / EVPPI)</text>
+  <text x="728" y="863" font-size="13" font-weight="500" fill="#0f172a">• Multi-Horizon Projections (up to 25 yrs)</text>
+  <text x="728" y="885" font-size="13" font-weight="500" fill="#0f172a">• Probabilistic Sensitivity Analysis (PSA;</text>
+  <text x="728" y="907" font-size="13" font-weight="500" fill="#0f172a">1,000+ runs)</text>
+  <text x="1218" y="841" font-size="12.8" font-weight="500" fill="#334155">Pinpoints exact clinical trial R&amp;D risks and</text>
+  <text x="1218" y="863" font-size="12.8" font-weight="500" fill="#334155">quantifies decision uncertainty for NICE Early Value</text>
+  <text x="1218" y="885" font-size="12.8" font-weight="500" fill="#334155">Assessment.</text>
+  <line x1="40" y1="928" x2="1800" y2="928" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="270" y1="816" x2="270" y2="928" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="710" y1="816" x2="710" y2="928" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="1200" y1="816" x2="1200" y2="928" stroke="#e2e8f0" stroke-width="1" />
+</svg>

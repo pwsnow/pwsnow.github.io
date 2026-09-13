@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 580" width="1000" height="580" style="background:#0b1329;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <text x="50" y="42" font-size="20" font-weight="800" fill="#f8fafc">Figure 3 — Waterfall Plot: Percentage Pain Reduction for All 20 Participants</text>
+  <text x="50" y="65" font-size="12" font-weight="600" fill="#94a3b8">Control (VR Only, n=6) vs. UK Experimental (n=6) vs. India Clinical Cohort (n=8)</text>
+
+  <g transform="translate(0, 0)">
+    <!-- Zero line at y=190 -->
+    <line x1="70" y1="190" x2="940" y2="190" stroke="#cbd5e1" stroke-width="2" />
+    <text x="55" y="194" text-anchor="end" font-size="11" font-weight="700" fill="#cbd5e1">0%</text>
+
+    <!-- Grid lines -->
+    <line x1="70" y1="110" x2="940" y2="110" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <text x="55" y="114" text-anchor="end" font-size="10" font-weight="600" fill="#ef4444">+30%</text>
+
+    <line x1="70" y1="270" x2="940" y2="270" stroke="#10b981" stroke-width="1" stroke-dasharray="4,4" opacity="0.6" />
+    <text x="55" y="274" text-anchor="end" font-size="10" font-weight="700" fill="#10b981">−30% (MCID)</text>
+
+    <line x1="70" y1="350" x2="940" y2="350" stroke="#38bdf8" stroke-width="1" stroke-dasharray="4,4" opacity="0.6" />
+    <text x="55" y="354" text-anchor="end" font-size="10" font-weight="700" fill="#38bdf8">−60% (Substantial)</text>
+
+    <line x1="70" y1="456" x2="940" y2="456" stroke="#a855f7" stroke-width="1" stroke-dasharray="3,3" />
+    <text x="55" y="460" text-anchor="end" font-size="10" font-weight="800" fill="#a855f7">−100% (Remission)</text>
+    <text x="25" y="300" text-anchor="middle" font-size="12" font-weight="700" fill="#cbd5e1" transform="rotate(-90, 25, 300)">% Pain Change from Baseline</text>
+
+    <!-- 20 Bars (width 34px, spacing 42px). x = 80 + i*42 -->
+    <!-- CONTROL (6 bars): P1(-25), P2(-20), P3(-100), P4(-40), P5(+25), P6(-40) -->
+    <!-- P1: -25% (h=66.5, y=190) -->
+    <rect x="80" y="190" width="34" height="66.5" rx="3" fill="#38bdf8" opacity="0.85" />
+    <text x="97" y="180" text-anchor="middle" font-size="9.5" font-weight="700" fill="#94a3b8">P1</text>
+    <text x="97" y="272" text-anchor="middle" font-size="9" font-weight="600" fill="#38bdf8">−25%</text>
+
+    <!-- P2: -20% (h=53.2, y=190) -->
+    <rect x="122" y="190" width="34" height="53.2" rx="3" fill="#38bdf8" opacity="0.85" />
+    <text x="139" y="180" text-anchor="middle" font-size="9.5" font-weight="700" fill="#94a3b8">P2</text>
+    <text x="139" y="258" text-anchor="middle" font-size="9" font-weight="600" fill="#38bdf8">−20%</text>
+
+    <!-- P3: -100% (h=266, y=190) -->
+    <rect x="164" y="190" width="34" height="266" rx="3" fill="#38bdf8" opacity="0.85" />
+    <text x="181" y="180" text-anchor="middle" font-size="9.5" font-weight="700" fill="#94a3b8">P3</text>
+    <text x="181" y="472" text-anchor="middle" font-size="9" font-weight="700" fill="#38bdf8">−100%</text>
+
+    <!-- P4: -40% (h=106.4, y=190) -->
+    <rect x="206" y="190" width="34" height="106.4" rx="3" fill="#38bdf8" opacity="0.85" />
+    <text x="223" y="180" text-anchor="middle" font-size="9.5" font-weight="700" fill="#94a3b8">P4</text>
+    <text x="223" y="312" text-anchor="middle" font-size="9" font-weight="600" fill="#38bdf8">−40%</text>
+
+    <!-- P5: +25% (h=66.5, y=123.5) -->
+    <rect x="248" y="123.5" width="34" height="66.5" rx="3" fill="#ef4444" opacity="0.85" />
+    <text x="265" y="115" text-anchor="middle" font-size="9.5" font-weight="700" fill="#ef4444">+25%</text>
+    <text x="265" y="208" text-anchor="middle" font-size="9.5" font-weight="700" fill="#94a3b8">P5</text>
+
+    <!-- P6: -40% (h=106.4, y=190) -->
+    <rect x="290" y="190" width="34" height="106.4" rx="3" fill="#38bdf8" opacity="0.85" />
+    <text x="307" y="180" text-anchor="middle" font-size="9.5" font-weight="700" fill="#94a3b8">P6</text>
+    <text x="307" y="312" text-anchor="middle" font-size="9" font-weight="600" fill="#38bdf8">−40%</text>
+
+    <!-- Separator 1 -->
+    <line x1="334" y1="100" x2="334" y2="480" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,4" />
+
+    <!-- UK EXPERIMENTAL (6 bars): P7(-100), P8(+20), P9(-100), P10(-88.9), P11(-33.3), P12(-60) -->
+    <!-- P7: -100% (h=266, y=190) -->
+    <rect x="344" y="190" width="34" height="266" rx="3" fill="#a855f7" opacity="0.85" />
+    <text x="361" y="180" text-anchor="middle" font-size="9.5" font-weight="700" fill="#c084fc">P7</text>
+    <text x="361" y="472" text-anchor="middle" font-size="9" font-weight="700" fill="#a855f7">−100%</text>
+
+    <!-- P8: +20% (h=53.2, y=136.8) -->
+    <rect x="386" y="136.8" width="34" height="53.2" rx="3" fill="#ef4444" opacity="0.85" />
+    <text x="403" y="128" text-anchor="middle" font-size="9.5" font-weight="700" fill="#ef4444">+20%</text>
+    <text x="403" y="208" text-anchor="middle" font-size="9.5" font-weight="700" fill="#c084fc">P8</text>
+
+    <!-- P9: -100% (h=266, y=190) -->
+    <rect x="428" y="190" width="34" height="266" rx="3" fill="#a855f7" opacity="0.85" />
+    <text x="445" y="180" text-anchor="middle" font-size="9.5" font-weight="700" fill="#c084fc">P9</text>
+    <text x="445" y="472" text-anchor="middle" font-size="9" font-weight="700" fill="#a855f7">−100%</text>
+
+    <!-- P10: -88.9% (h=236.5, y=190) -->
+    <rect x="470" y="190" width="34" height="236.5" rx="3" fill="#a855f7" opacity="0.85" />
+    <text x="487" y="180" text-anchor="middle" font-size="9.5" font-weight="700" fill="#c084fc">P10</text>
+    <text x="487" y="442" text-anchor="middle" font-size="9" font-weight="700" fill="#a855f7">−89%</text>
+
+    <!-- P11: -33.3% (h=88.6, y=190) -->
+    <rect x="512" y="190" width="34" height="88.6" rx="3" fill="#a855f7" opacity="0.85" />
+    <text x="529" y="180" text-anchor="middle" font-size="9.5" font-weight="700" fill="#c084fc">P11</text>
+    <text x="529" y="294" text-anchor="middle" font-size="9" font-weight="600" fill="#a855f7">−33%</text>
+
+    <!-- P12: -60.0% (h=159.6, y=190) -->
+    <rect x="554" y="190" width="34" height="159.6" rx="3" fill="#a855f7" opacity="0.85" />
+    <text x="571" y="180" text-anchor="middle" font-size="9.5" font-weight="700" fill="#c084fc">P12</text>
+    <text x="571" y="365" text-anchor="middle" font-size="9" font-weight="700" fill="#a855f7">−60%</text>
+
+    <!-- Separator 2 -->
+    <line x1="598" y1="100" x2="598" y2="480" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,4" />
+
+    <!-- INDIA EXPERIMENTAL (8 bars): TR01(-100), TR02(-100), TR03(-100), TR05(0), TR06(-75), TR07(-14.3), TR08(-100), TR09(-50) -->
+    <!-- TR01: -100% -->
+    <rect x="608" y="190" width="34" height="266" rx="3" fill="#10b981" opacity="0.85" />
+    <text x="625" y="180" text-anchor="middle" font-size="9" font-weight="700" fill="#10b981">TR01</text>
+    <text x="625" y="472" text-anchor="middle" font-size="9" font-weight="700" fill="#10b981">−100%</text>
+
+    <!-- TR02: -100% -->
+    <rect x="650" y="190" width="34" height="266" rx="3" fill="#10b981" opacity="0.85" />
+    <text x="667" y="180" text-anchor="middle" font-size="9" font-weight="700" fill="#10b981">TR02</text>
+    <text x="667" y="472" text-anchor="middle" font-size="9" font-weight="700" fill="#10b981">−100%</text>
+
+    <!-- TR03: -100% -->
+    <rect x="692" y="190" width="34" height="266" rx="3" fill="#10b981" opacity="0.85" />
+    <text x="709" y="180" text-anchor="middle" font-size="9" font-weight="700" fill="#10b981">TR03</text>
+    <text x="709" y="472" text-anchor="middle" font-size="9" font-weight="700" fill="#10b981">−100%</text>
+
+    <!-- TR05: 0% -->
+    <rect x="734" y="188" width="34" height="4" rx="2" fill="#64748b" opacity="0.85" />
+    <text x="751" y="180" text-anchor="middle" font-size="9" font-weight="700" fill="#94a3b8">TR05</text>
+    <text x="751" y="206" text-anchor="middle" font-size="9" font-weight="600" fill="#94a3b8">0%</text>
+
+    <!-- TR06: -75% -->
+    <rect x="776" y="190" width="34" height="199.5" rx="3" fill="#10b981" opacity="0.85" />
+    <text x="793" y="180" text-anchor="middle" font-size="9" font-weight="700" fill="#10b981">TR06</text>
+    <text x="793" y="405" text-anchor="middle" font-size="9" font-weight="700" fill="#10b981">−75%</text>
+
+    <!-- TR07: -14.3% -->
+    <rect x="818" y="190" width="34" height="38" rx="3" fill="#10b981" opacity="0.85" />
+    <text x="835" y="180" text-anchor="middle" font-size="9" font-weight="700" fill="#10b981">TR07</text>
+    <text x="835" y="244" text-anchor="middle" font-size="9" font-weight="600" fill="#10b981">−14%</text>
+
+    <!-- TR08: -100% -->
+    <rect x="860" y="190" width="34" height="266" rx="3" fill="#10b981" opacity="0.85" />
+    <text x="877" y="180" text-anchor="middle" font-size="9" font-weight="700" fill="#10b981">TR08</text>
+    <text x="877" y="472" text-anchor="middle" font-size="9" font-weight="700" fill="#10b981">−100%</text>
+
+    <!-- TR09: -50% -->
+    <rect x="902" y="190" width="34" height="133" rx="3" fill="#10b981" opacity="0.85" />
+    <text x="919" y="180" text-anchor="middle" font-size="9" font-weight="700" fill="#10b981">TR09</text>
+    <text x="919" y="338" text-anchor="middle" font-size="9" font-weight="700" fill="#10b981">−50%</text>
+
+    <!-- Cohort Labels -->
+    <text x="207" y="505" text-anchor="middle" font-size="11" font-weight="800" fill="#38bdf8">UK Control (n=6) · Mean −33.3%</text>
+    <text x="466" y="505" text-anchor="middle" font-size="11" font-weight="800" fill="#a855f7">UK Experimental (n=6) · Mean −60.4%</text>
+    <text x="770" y="505" text-anchor="middle" font-size="11" font-weight="800" fill="#10b981">India Experimental (n=8) · Mean −67.4%</text>
+  </g>
+</svg>

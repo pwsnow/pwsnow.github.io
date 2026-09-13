@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 580" width="1000" height="580" style="background:#0b1329;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <text x="50" y="42" font-size="20" font-weight="800" fill="#f8fafc">Figure 4 — Multi-Threshold Responder Rates: Control vs. Pooled Experimental</text>
+  <text x="50" y="65" font-size="12" font-weight="600" fill="#94a3b8">Proportion of Participants Achieving Categorical Thresholds of Pain Relief (Control n=6 vs. Pooled VR+Robotics n=14)</text>
+
+  <g transform="translate(0, 0)">
+    <!-- Y axis: 0 to 100% (height 360: y=110 to 470) -->
+    <line x1="120" y1="470" x2="900" y2="470" stroke="#334155" stroke-width="1.5" />
+    <line x1="120" y1="380" x2="900" y2="380" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <line x1="120" y1="290" x2="900" y2="290" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <line x1="120" y1="200" x2="900" y2="200" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <line x1="120" y1="110" x2="900" y2="110" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+
+    <text x="105" y="474" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">0%</text>
+    <text x="105" y="384" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">25%</text>
+    <text x="105" y="294" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">50%</text>
+    <text x="105" y="204" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">75%</text>
+    <text x="105" y="114" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">100%</text>
+    <text x="65" y="290" text-anchor="middle" font-size="12" font-weight="700" fill="#cbd5e1" transform="rotate(-90, 65, 290)">Percentage of Cohort (%)</text>
+
+    <!-- Grouped Bars: 5 Categories
+         1: Any Reduction (>0%)
+         2: Minimally Meaningful (>=20%)
+         3: Clinical MCID (>=30%)
+         4: Substantial Relief (>=50%)
+         5: Complete Remission (100%)
+    -->
+    <!-- 1: Any Reduction (>0%)
+         Ctrl: 5/6 = 83.3% (h=300, y=170)
+         Exp:  13/14 = 92.9% (h=334.4, y=135.6)
+    -->
+    <rect x="160" y="170" width="45" height="300" rx="3" fill="#38bdf8" opacity="0.85" />
+    <text x="182.5" y="160" text-anchor="middle" font-size="11" font-weight="700" fill="#38bdf8">83.3%</text>
+    <rect x="210" y="135.6" width="45" height="334.4" rx="3" fill="#10b981" opacity="0.9" />
+    <text x="232.5" y="125" text-anchor="middle" font-size="11" font-weight="800" fill="#10b981">92.9%</text>
+    <text x="207.5" y="495" text-anchor="middle" font-size="11" font-weight="700" fill="#cbd5e1">Any Reduction (>0%)</text>
+
+    <!-- 2: Minimally Meaningful (>=20%)
+         Ctrl: 5/6 = 83.3%
+         Exp:  13/14 = 92.9%
+    -->
+    <rect x="310" y="170" width="45" height="300" rx="3" fill="#38bdf8" opacity="0.85" />
+    <text x="332.5" y="160" text-anchor="middle" font-size="11" font-weight="700" fill="#38bdf8">83.3%</text>
+    <rect x="360" y="135.6" width="45" height="334.4" rx="3" fill="#10b981" opacity="0.9" />
+    <text x="382.5" y="125" text-anchor="middle" font-size="11" font-weight="800" fill="#10b981">92.9%</text>
+    <text x="357.5" y="495" text-anchor="middle" font-size="11" font-weight="700" fill="#cbd5e1">Minimal (≥20%)</text>
+
+    <!-- 3: Clinical MCID (>=30%)
+         Ctrl: 3/6 = 50.0% (h=180, y=290)
+         Exp:  12/14 = 85.7% (h=308.5, y=161.5)
+    -->
+    <rect x="460" y="290" width="45" height="180" rx="3" fill="#38bdf8" opacity="0.85" />
+    <text x="482.5" y="280" text-anchor="middle" font-size="11" font-weight="700" fill="#38bdf8">50.0%</text>
+    <rect x="510" y="161.5" width="45" height="308.5" rx="3" fill="#10b981" opacity="0.9" />
+    <text x="532.5" y="150" text-anchor="middle" font-size="11" font-weight="800" fill="#10b981">85.7%</text>
+    <text x="507.5" y="495" text-anchor="middle" font-size="11" font-weight="800" fill="#10b981">MCID (≥30%)</text>
+
+    <!-- 4: Substantial Relief (>=50%)
+         Ctrl: 1/6 = 16.7% (h=60, y=410)
+         Exp:  11/14 = 78.6% (h=283, y=187)
+         FISHER SIGNIFICANT: p = 0.018 *
+    -->
+    <rect x="610" y="410" width="45" height="60" rx="3" fill="#38bdf8" opacity="0.85" />
+    <text x="632.5" y="400" text-anchor="middle" font-size="11" font-weight="700" fill="#38bdf8">16.7%</text>
+    <rect x="660" y="187" width="45" height="283" rx="3" fill="#10b981" opacity="0.9" />
+    <text x="682.5" y="175" text-anchor="middle" font-size="12" font-weight="900" fill="#10b981">78.6%</text>
+    <text x="657.5" y="495" text-anchor="middle" font-size="11" font-weight="800" fill="#fbbf24">Substantial (≥50%)</text>
+    <!-- Callout badge for significance -->
+    <line x1="632.5" y1="140" x2="682.5" y2="140" stroke="#fbbf24" stroke-width="1.5" />
+    <line x1="632.5" y1="140" x2="632.5" y2="155" stroke="#fbbf24" stroke-width="1.5" />
+    <line x1="682.5" y1="140" x2="682.5" y2="155" stroke="#fbbf24" stroke-width="1.5" />
+    <rect x="615" y="118" width="85" height="20" rx="3" fill="#0b1329" stroke="#fbbf24" stroke-width="1" />
+    <text x="657.5" y="132" text-anchor="middle" font-size="10" font-weight="900" fill="#fbbf24">p = 0.018 *</text>
+
+    <!-- 5: Complete Remission (100%)
+         Ctrl: 1/6 = 16.7% (h=60, y=410)
+         Exp:  7/14 = 50.0% (h=180, y=290)
+    -->
+    <rect x="760" y="410" width="45" height="60" rx="3" fill="#38bdf8" opacity="0.85" />
+    <text x="782.5" y="400" text-anchor="middle" font-size="11" font-weight="700" fill="#38bdf8">16.7%</text>
+    <rect x="810" y="290" width="45" height="180" rx="3" fill="#10b981" opacity="0.9" />
+    <text x="832.5" y="280" text-anchor="middle" font-size="12" font-weight="900" fill="#10b981">50.0%</text>
+    <text x="807.5" y="495" text-anchor="middle" font-size="11" font-weight="700" fill="#a855f7">Pain-Free (100%)</text>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(320, 535)">
+    <rect x="0" y="0" width="22" height="12" rx="2" fill="#38bdf8" opacity="0.85" />
+    <text x="30" y="10" font-size="11" font-weight="700" fill="#38bdf8">Control Group (VR Only, n=6)</text>
+
+    <rect x="230" y="0" width="22" height="12" rx="2" fill="#10b981" opacity="0.9" />
+    <text x="260" y="10" font-size="11" font-weight="800" fill="#10b981">Pooled VR+Robotics Cohort (n=14)</text>
+  </g>
+</svg>

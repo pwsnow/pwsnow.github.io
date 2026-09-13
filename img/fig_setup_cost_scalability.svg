@@ -1,0 +1,193 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 960" width="1920" height="960" style="background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+<defs>
+  <filter id="cardShadow" x="-2%" y="-2%" width="104%" height="106%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000000" flood-opacity="0.06" /></filter>
+</defs>
+<rect width="1920" height="960" fill="#ffffff" />
+<rect x="40" y="22" width="1840" height="92" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2" />
+<text x="70" y="58" font-size="22" font-weight="900" fill="#0f172a" letter-spacing="-0.02em">Implementation Set-Up Cost Scalability: Per-Patient Impact vs. NICE Appraisal Thresholds</text>
+<text x="70" y="88" font-size="14" font-weight="500" fill="#475569">Economic evaluation of one-off programme set-up costs across Initial Pilot (N = 120) and National NHS Rollout (N = 5,762/year) scenarios</text>
+<rect x="40" y="130" width="880" height="700" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2" filter="url(#cardShadow)" />
+<text x="65" y="162" font-size="16.5" font-weight="900" fill="#0f172a">A: Per-Patient Net NHS Cost (ΔC) &amp; Net Monetary Benefit (NMB)</text>
+<text x="65" y="184" font-size="12.5" font-weight="500" fill="#64748b">Downstream offsets (£776.50/pt) absorb setup costs up to £735.95; positive NMB persists up to £5,373.63/pt</text>
+<rect x="150" y="240" width="630" height="520" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2" />
+<rect x="150.0" y="240" width="57.9560625" height="520" fill="#ecfdf5" />
+<rect x="207.9560625" y="240" width="365.2173" height="520" fill="#f0f9ff" />
+<rect x="573.1733625" y="240" width="206.82663749999995" height="520" fill="#fef2f2" />
+<line x1="150" y1="760.0" x2="780" y2="760.0" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="4,3" />
+<text x="138" y="764.5" font-size="12" font-weight="500" fill="#64748b" text-anchor="end">−£2,000</text>
+<line x1="150" y1="708.0" x2="780" y2="708.0" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="4,3" />
+<line x1="150" y1="656.0" x2="780" y2="656.0" stroke="#64748b" stroke-width="1.6" stroke-dasharray="none" />
+<text x="138" y="660.5" font-size="12" font-weight="700" fill="#0f172a" text-anchor="end">£0</text>
+<line x1="150" y1="604.0" x2="780" y2="604.0" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="4,3" />
+<line x1="150" y1="552.0" x2="780" y2="552.0" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="4,3" />
+<text x="138" y="556.5" font-size="12" font-weight="500" fill="#64748b" text-anchor="end">£2,000</text>
+<line x1="150" y1="500.0" x2="780" y2="500.0" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="4,3" />
+<line x1="150" y1="448.0" x2="780" y2="448.0" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="4,3" />
+<text x="138" y="452.5" font-size="12" font-weight="500" fill="#64748b" text-anchor="end">£4,000</text>
+<line x1="150" y1="396.0" x2="780" y2="396.0" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="4,3" />
+<line x1="150" y1="344.0" x2="780" y2="344.0" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="4,3" />
+<text x="138" y="348.5" font-size="12" font-weight="500" fill="#64748b" text-anchor="end">£6,000</text>
+<line x1="150" y1="292.0" x2="780" y2="292.0" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="4,3" />
+<line x1="150" y1="240.0" x2="780" y2="240.0" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="4,3" />
+<text x="138" y="244.5" font-size="12" font-weight="500" fill="#64748b" text-anchor="end">£8,000</text>
+<line x1="150.0" y1="240" x2="150.0" y2="760" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
+<text x="150.0" y="780" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">£0</text>
+<text x="150.0" y="232" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">£0.0M</text>
+<line x1="228.75" y1="240" x2="228.75" y2="760" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
+<text x="228.75" y="780" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">£1,000</text>
+<text x="228.75" y="232" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">£5.8M</text>
+<line x1="307.5" y1="240" x2="307.5" y2="760" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
+<text x="307.5" y="780" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">£2,000</text>
+<text x="307.5" y="232" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">£11.5M</text>
+<line x1="386.25" y1="240" x2="386.25" y2="760" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
+<text x="386.25" y="780" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">£3,000</text>
+<text x="386.25" y="232" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">£17.3M</text>
+<line x1="465.0" y1="240" x2="465.0" y2="760" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
+<text x="465.0" y="780" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">£4,000</text>
+<text x="465.0" y="232" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">£23.0M</text>
+<line x1="543.75" y1="240" x2="543.75" y2="760" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
+<text x="543.75" y="780" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">£5,000</text>
+<text x="543.75" y="232" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">£28.8M</text>
+<line x1="622.5" y1="240" x2="622.5" y2="760" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
+<text x="622.5" y="780" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">£6,000</text>
+<text x="622.5" y="232" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">£34.6M</text>
+<line x1="701.25" y1="240" x2="701.25" y2="760" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
+<text x="701.25" y="780" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">£7,000</text>
+<text x="701.25" y="232" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">£40.3M</text>
+<line x1="780.0" y1="240" x2="780.0" y2="760" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
+<text x="780.0" y="780" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">£8,000</text>
+<text x="780.0" y="232" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">£46.1M</text>
+<text x="465.0" y="802" font-size="13.5" font-weight="800" fill="#0f172a" text-anchor="middle">Allocated One-Off Set-Up Cost per Patient (C_setup, £/pt)</text>
+<text x="465.0" y="216" font-size="11.5" font-weight="700" fill="#64748b" text-anchor="middle">Equivalent National NHS England Setup Budget (N = 5,762 Amputees/Year)</text>
+<text x="96" y="500.0" font-size="13.5" font-weight="800" fill="#0f172a" text-anchor="middle" transform="rotate(-90 96 500.0)">Economic Value per Patient (£/pt)</text>
+<line x1="150.0" y1="694.2694" x2="780.0" y2="278.2694" stroke="#dc2626" stroke-width="3.5" />
+<line x1="150.0" y1="376.57124" x2="730.6733625" y2="760.0" stroke="#059669" stroke-width="3.5" />
+<line x1="150.0" y1="424.8028" x2="657.630375" y2="760.0" stroke="#0284c7" stroke-width="2.4" stroke-dasharray="6,4" />
+<line x1="207.9560625" y1="240" x2="207.9560625" y2="760" stroke="#059669" stroke-width="1.8" stroke-dasharray="4,3" />
+<line x1="500.130375" y1="240" x2="500.130375" y2="760" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="4,3" />
+<line x1="573.1733625" y1="240" x2="573.1733625" y2="760" stroke="#b91c1c" stroke-width="1.8" stroke-dasharray="4,3" />
+<circle cx="150.0" cy="694.2694" r="6" fill="#dc2626" stroke="#ffffff" stroke-width="2" />
+<rect x="162.0" y="681.2694" width="168" height="24" rx="4" fill="#fef2f2" stroke="#fecaca" stroke-width="1" />
+<text x="246.0" y="697.2694" font-size="11" font-weight="800" fill="#b91c1c" text-anchor="middle">Base: −£736/pt (Savings)</text>
+<circle cx="150.0" cy="376.57124" r="6" fill="#059669" stroke="#ffffff" stroke-width="2" />
+<rect x="162.0" y="363.57124" width="158" height="24" rx="4" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1" />
+<text x="241.0" y="379.57124" font-size="11" font-weight="800" fill="#047857" text-anchor="middle">Base NMB: +£5,374/pt</text>
+<circle cx="207.9560625" cy="656.0" r="6.5" fill="#059669" stroke="#ffffff" stroke-width="2" />
+<rect x="202.9560625" y="620.0" width="176" height="24" rx="4" fill="#059669" />
+<text x="290.95606250000003" y="636.0" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">Cost-Saving Limit: £735.95/pt</text>
+<circle cx="500.130375" cy="656.0" r="5.5" fill="#0284c7" stroke="#ffffff" stroke-width="2" />
+<text x="492.130375" y="644.0" font-size="11" font-weight="700" fill="#0369a1" text-anchor="end">NICE £20k Limit: £4,446/pt</text>
+<circle cx="573.1733625" cy="656.0" r="6.5" fill="#b91c1c" stroke="#ffffff" stroke-width="2" />
+<rect x="567.1733625" y="670.0" width="180" height="24" rx="4" fill="#b91c1c" />
+<text x="657.1733625" y="686.0" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">NICE £25k Ceiling: £5,374/pt</text>
+<rect x="370" y="256" width="280" height="96" rx="6" fill="#ffffff" fill-opacity="0.95" stroke="#cbd5e1" stroke-width="1" />
+<line x1="382" y1="276" x2="417" y2="276" stroke="#dc2626" stroke-width="3.5" />
+<text x="426" y="280" font-size="11.5" font-weight="700" fill="#0f172a">Net NHS Cost (ΔC per patient)</text>
+<line x1="382" y1="302" x2="417" y2="302" stroke="#059669" stroke-width="3.5" />
+<text x="426" y="306" font-size="11.5" font-weight="700" fill="#0f172a">NMB @ £25k Threshold (£/pt)</text>
+<line x1="382" y1="328" x2="417" y2="328" stroke="#0284c7" stroke-width="2.4" stroke-dasharray="5,3" />
+<text x="426" y="332" font-size="11.5" font-weight="700" fill="#0f172a">NMB @ £20k Threshold (£/pt)</text>
+<rect x="940" y="130" width="940" height="700" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2" filter="url(#cardShadow)" />
+<text x="965" y="162" font-size="16.5" font-weight="900" fill="#0f172a">B: ICER Trajectory vs. NICE Decision Thresholds (£/QALY)</text>
+<text x="965" y="184" font-size="12.5" font-weight="500" fill="#64748b">Transitions from Quadrant IV (Dominance) through £20k, £25k, £30k, and £35k/QALY</text>
+<rect x="1010" y="240" width="630" height="520" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2" />
+<rect x="1010.0" y="240" width="57.956062499999916" height="520" fill="#ecfdf5" />
+<rect x="1067.9560625" y="240" width="292.17431250000004" height="520" fill="#f0f9ff" />
+<rect x="1360.130375" y="240" width="146.08676250000008" height="520" fill="#fffbeb" />
+<rect x="1506.2171375" y="240" width="133.78286249999996" height="520" fill="#fef2f2" />
+<line x1="1010" y1="760.0" x2="1640" y2="760.0" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="3,3" />
+<text x="998" y="764.5" font-size="12" font-weight="500" fill="#64748b" text-anchor="end">−£10k</text>
+<line x1="1010" y1="665.4545454545455" x2="1640" y2="665.4545454545455" stroke="#0f172a" stroke-width="1.6" stroke-dasharray="none" />
+<text x="998" y="669.9545454545455" font-size="12" font-weight="700" fill="#0f172a" text-anchor="end">£0k</text>
+<text x="1650" y="669.4545454545455" font-size="11.5" font-weight="700" fill="#0f172a">Cost-Neutral (ICER=0)</text>
+<line x1="1010" y1="570.9090909090909" x2="1640" y2="570.9090909090909" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="3,3" />
+<text x="998" y="575.4090909090909" font-size="12" font-weight="500" fill="#64748b" text-anchor="end">£10k</text>
+<line x1="1010" y1="476.3636363636364" x2="1640" y2="476.3636363636364" stroke="#0284c7" stroke-width="1.6" stroke-dasharray="5,4" />
+<text x="998" y="480.8636363636364" font-size="12" font-weight="700" fill="#0f172a" text-anchor="end">£20k</text>
+<text x="1650" y="480.3636363636364" font-size="11.5" font-weight="700" fill="#0284c7">NICE Lower (£20k/QALY)</text>
+<line x1="1010" y1="429.0909090909091" x2="1640" y2="429.0909090909091" stroke="#059669" stroke-width="1.8" stroke-dasharray="6,4" />
+<text x="998" y="433.5909090909091" font-size="12" font-weight="700" fill="#0f172a" text-anchor="end">£25k</text>
+<text x="1650" y="433.0909090909091" font-size="11.5" font-weight="800" fill="#059669">NICE Reference (£25k)</text>
+<line x1="1010" y1="381.8181818181818" x2="1640" y2="381.8181818181818" stroke="#d97706" stroke-width="1.6" stroke-dasharray="5,4" />
+<text x="998" y="386.3181818181818" font-size="12" font-weight="700" fill="#0f172a" text-anchor="end">£30k</text>
+<text x="1650" y="385.8181818181818" font-size="11.5" font-weight="700" fill="#d97706">NICE Upper (£30k)</text>
+<line x1="1010" y1="334.5454545454545" x2="1640" y2="334.5454545454545" stroke="#7c3aed" stroke-width="1.4" stroke-dasharray="4,3" />
+<text x="998" y="339.0454545454545" font-size="12" font-weight="700" fill="#0f172a" text-anchor="end">£35k</text>
+<text x="1650" y="338.5454545454545" font-size="11.5" font-weight="700" fill="#7c3aed">NICE Severity (£35k)</text>
+<line x1="1010" y1="287.2727272727273" x2="1640" y2="287.2727272727273" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="3,3" />
+<text x="998" y="291.7727272727273" font-size="12" font-weight="500" fill="#64748b" text-anchor="end">£40k</text>
+<line x1="1010" y1="240.0" x2="1640" y2="240.0" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="3,3" />
+<text x="998" y="244.5" font-size="12" font-weight="500" fill="#64748b" text-anchor="end">£45k</text>
+<line x1="1010.0" y1="240" x2="1010.0" y2="760" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
+<text x="1010.0" y="780" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">£0</text>
+<text x="1010.0" y="232" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">£0k</text>
+<line x1="1088.75" y1="240" x2="1088.75" y2="760" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
+<text x="1088.75" y="780" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">£1,000</text>
+<text x="1088.75" y="232" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">£120k</text>
+<line x1="1167.5" y1="240" x2="1167.5" y2="760" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
+<text x="1167.5" y="780" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">£2,000</text>
+<text x="1167.5" y="232" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">£240k</text>
+<line x1="1246.25" y1="240" x2="1246.25" y2="760" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
+<text x="1246.25" y="780" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">£3,000</text>
+<text x="1246.25" y="232" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">£360k</text>
+<line x1="1325.0" y1="240" x2="1325.0" y2="760" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
+<text x="1325.0" y="780" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">£4,000</text>
+<text x="1325.0" y="232" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">£480k</text>
+<line x1="1403.75" y1="240" x2="1403.75" y2="760" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
+<text x="1403.75" y="780" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">£5,000</text>
+<text x="1403.75" y="232" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">£600k</text>
+<line x1="1482.5" y1="240" x2="1482.5" y2="760" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
+<text x="1482.5" y="780" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">£6,000</text>
+<text x="1482.5" y="232" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">£720k</text>
+<line x1="1561.25" y1="240" x2="1561.25" y2="760" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
+<text x="1561.25" y="780" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">£7,000</text>
+<text x="1561.25" y="232" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">£840k</text>
+<line x1="1640.0" y1="240" x2="1640.0" y2="760" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
+<text x="1640.0" y="780" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">£8,000</text>
+<text x="1640.0" y="232" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">£960k</text>
+<text x="1325.0" y="802" font-size="13.5" font-weight="800" fill="#0f172a" text-anchor="middle">Allocated One-Off Set-Up Cost per Patient (C_setup, £/pt)</text>
+<text x="1325.0" y="216" font-size="11.5" font-weight="700" fill="#64748b" text-anchor="middle">Equivalent Multi-Centre Regional Pilot Budget (N = 120 Patients across 5 Sites)</text>
+<text x="956" y="500.0" font-size="13.5" font-weight="800" fill="#0f172a" text-anchor="middle" transform="rotate(-90 956 500.0)">Incremental Cost-Effectiveness Ratio (£k / QALY)</text>
+<polyline points="1010.0,703.0 1025.8,692.8 1041.5,682.6 1057.2,672.4 1073.0,662.2 1088.8,652.0 1104.5,641.8 1120.2,631.6 1136.0,621.4 1151.8,611.2 1167.5,601.0 1183.2,590.8 1199.0,580.6 1214.8,570.5 1230.5,560.3 1246.2,550.1 1262.0,539.9 1277.8,529.7 1293.5,519.5 1309.2,509.3 1325.0,499.1 1340.8,488.9 1356.5,478.7 1372.2,468.5 1388.0,458.3 1403.8,448.1 1419.5,437.9 1435.2,427.8 1451.0,417.6 1466.8,407.4 1482.5,397.2 1498.2,387.0 1514.0,376.8 1529.8,366.6 1545.5,356.4 1561.2,346.2 1577.0,336.0 1592.8,325.8 1608.5,315.6 1624.2,305.4 1640.0,295.2" fill="none" stroke="#2563eb" stroke-width="3.8" stroke-linejoin="round" />
+<line x1="1067.9560625" y1="240" x2="1067.9560625" y2="760" stroke="#059669" stroke-width="1.8" stroke-dasharray="4,3" />
+<line x1="1360.130375" y1="240" x2="1360.130375" y2="760" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="4,3" />
+<line x1="1433.1733625000002" y1="240" x2="1433.1733625000002" y2="760" stroke="#059669" stroke-width="1.8" stroke-dasharray="4,3" />
+<line x1="1506.2171375" y1="240" x2="1506.2171375" y2="760" stroke="#d97706" stroke-width="1.5" stroke-dasharray="4,3" />
+<circle cx="1010.0" cy="702.9629963636364" r="6.5" fill="#2563eb" stroke="#ffffff" stroke-width="2" />
+<rect x="1020.0" y="690.9629963636364" width="168" height="24" rx="4" fill="#1e293b" />
+<text x="1104.0" y="706.9629963636364" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">Base: −£3,967/QALY</text>
+<circle cx="1067.9560625" cy="665.4545454545455" r="6" fill="#059669" stroke="#ffffff" stroke-width="2" />
+<text x="1075.9560625" y="683.4545454545455" font-size="11.5" font-weight="800" fill="#047857">Breakeven (£736/pt)</text>
+<circle cx="1360.130375" cy="476.3636363636364" r="6" fill="#0284c7" stroke="#ffffff" stroke-width="2" />
+<text x="1350.130375" y="464.3636363636364" font-size="11.5" font-weight="700" fill="#0369a1" text-anchor="end">£20k Limit: £4,446/pt</text>
+<circle cx="1433.1733625000002" cy="429.0909090909091" r="6.5" fill="#059669" stroke="#ffffff" stroke-width="2" />
+<rect x="1427.1733625000002" y="399.0909090909091" width="168" height="24" rx="4" fill="#059669" />
+<text x="1511.1733625000002" y="415.0909090909091" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">£25k Reference: £5,374/pt</text>
+<circle cx="1506.2171375" cy="381.8181818181818" r="6" fill="#d97706" stroke="#ffffff" stroke-width="2" />
+<text x="1516.2171375" y="397.8181818181818" font-size="11.5" font-weight="700" fill="#b45309">£30k Limit: £6,301/pt</text>
+<text x="1038.97803125" y="266" font-size="11" font-weight="800" fill="#047857" text-anchor="middle">DOMINANT</text>
+<text x="1214.04321875" y="266" font-size="11" font-weight="800" fill="#0369a1" text-anchor="middle">HIGHLY COST-EFFECTIVE</text>
+<text x="1433.17375625" y="266" font-size="10.5" font-weight="800" fill="#b45309" text-anchor="middle">NICE £20k–£30k BAND</text>
+<text x="1573.10856875" y="266" font-size="10.5" font-weight="800" fill="#b91c1c" text-anchor="middle">NOT CE</text>
+<rect x="40" y="850" width="1840" height="85" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2" />
+<rect x="65" y="865" width="415" height="55" rx="6" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1" />
+<circle cx="85" cy="892" r="9" fill="#10b981" />
+<text x="85" y="896" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle">1</text>
+<text x="105" y="883" font-size="12.5" font-weight="800" fill="#065f46">Dominant Zone: Set-Up ≤ £735.95 / pt</text>
+<text x="105" y="904" font-size="11" font-weight="500" fill="#047857">100% self-funding (National: ≤£4.24M; Pilot: ≤£88.3k budget)</text>
+<rect x="515" y="865" width="425" height="55" rx="6" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1" />
+<circle cx="535" cy="892" r="9" fill="#0284c7" />
+<text x="535" y="896" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle">2</text>
+<text x="555" y="883" font-size="12.5" font-weight="800" fill="#075985">Turnkey Viable: Set-Up £736 – £4,446 / pt</text>
+<text x="555" y="904" font-size="11" font-weight="500" fill="#0369a1">Passes NICE lower threshold (&lt;£20k/QALY; National: &lt;£25.6M)</text>
+<rect x="975" y="865" width="445" height="55" rx="6" fill="#fffbeb" stroke="#fde68a" stroke-width="1" />
+<circle cx="995" cy="892" r="9" fill="#f59e0b" />
+<text x="995" y="896" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle">3</text>
+<text x="1015" y="883" font-size="12.5" font-weight="800" fill="#92400e">NICE Standard Band: Set-Up £4,446 – £6,301 / pt</text>
+<text x="1015" y="904" font-size="11" font-weight="500" fill="#b45309">Within standard NICE reference case (£20k–£30k/QALY)</text>
+<rect x="1455" y="865" width="405" height="55" rx="6" fill="#fef2f2" stroke="#fecaca" stroke-width="1" />
+<circle cx="1475" cy="892" r="9" fill="#ef4444" />
+<text x="1475" y="896" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle">4</text>
+<text x="1495" y="883" font-size="12.5" font-weight="800" fill="#991b1b">Upper Limit: Set-Up &gt; £6,301.17 / pt</text>
+<text x="1495" y="904" font-size="11" font-weight="500" fill="#b91c1c">Exceeds standard threshold (National budget &gt; £36.3M)</text>
+</svg>

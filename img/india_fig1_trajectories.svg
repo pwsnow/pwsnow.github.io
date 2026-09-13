@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 620" width="1000" height="620" style="background:#0b1329;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <!-- Title & Subtitle -->
+  <text x="50" y="42" font-size="20" font-weight="800" fill="#f8fafc">Figure 1 — Individual Pain Trajectories (NRS 0–10) Across 10 Sessions &amp; Follow-ups</text>
+  <text x="50" y="65" font-size="12" font-weight="600" fill="#94a3b8">India Clinical Study Cohort (N=9, 8 Completers) | Baseline, Sessions 1–10 (Post), 6-Week FU1 &amp; 12-Week FU2</text>
+
+  <!-- Plot Area: x=90 to 930 (width 840), y=100 to 520 (height 420) -->
+  <!-- Y: 0 to 10. 420/10 = 42px per unit. y = 520 - nrs * 42 -->
+  <g transform="translate(0, 0)">
+    <!-- Severity Zones -->
+    <rect x="90" y="100" width="840" height="126" fill="#ef4444" opacity="0.08" />
+    <text x="920" y="125" text-anchor="end" font-size="11" font-weight="700" fill="#ef4444">Severe (7–10)</text>
+
+    <rect x="90" y="226" width="840" height="126" fill="#f59e0b" opacity="0.08" />
+    <text x="920" y="250" text-anchor="end" font-size="11" font-weight="700" fill="#f59e0b">Moderate (4–6)</text>
+
+    <rect x="90" y="352" width="840" height="126" fill="#38bdf8" opacity="0.08" />
+    <text x="920" y="375" text-anchor="end" font-size="11" font-weight="700" fill="#38bdf8">Mild (1–3)</text>
+
+    <rect x="90" y="478" width="840" height="42" fill="#10b981" opacity="0.10" />
+    <text x="920" y="505" text-anchor="end" font-size="11" font-weight="700" fill="#10b981">Pain-Free (0)</text>
+
+    <!-- Grid lines -->
+    <line x1="90" y1="520" x2="930" y2="520" stroke="#334155" stroke-width="1.5" />
+    <line x1="90" y1="478" x2="930" y2="478" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <line x1="90" y1="436" x2="930" y2="436" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <line x1="90" y1="394" x2="930" y2="394" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <line x1="90" y1="352" x2="930" y2="352" stroke="#334155" stroke-width="1" stroke-dasharray="4,4" />
+    <line x1="90" y1="310" x2="930" y2="310" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <line x1="90" y1="268" x2="930" y2="268" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <line x1="90" y1="226" x2="930" y2="226" stroke="#334155" stroke-width="1" stroke-dasharray="4,4" />
+    <line x1="90" y1="184" x2="930" y2="184" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <line x1="90" y1="142" x2="930" y2="142" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <line x1="90" y1="100" x2="930" y2="100" stroke="#334155" stroke-width="1.5" />
+
+    <!-- Y labels -->
+    <text x="75" y="524" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">0</text>
+    <text x="75" y="440" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">2</text>
+    <text x="75" y="356" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">4</text>
+    <text x="75" y="272" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">6</text>
+    <text x="75" y="188" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">8</text>
+    <text x="75" y="104" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">10</text>
+    <text x="35" y="310" text-anchor="middle" font-size="12" font-weight="700" fill="#cbd5e1" transform="rotate(-90, 35, 310)">Pain Score (NRS 0–10)</text>
+
+    <!-- X Timepoints: 13 columns (x = 110 + i * 66.6)
+         0: Base (x=110)
+         1..10: S1..S10 (x=175, 240, 305, 370, 435, 500, 565, 630, 695, 760)
+         11: FU1 6w (x=835)
+         12: FU2 12w (x=905)
+    -->
+    <text x="110" y="542" text-anchor="middle" font-size="10" font-weight="700" fill="#94a3b8">Base</text>
+    <text x="175" y="542" text-anchor="middle" font-size="10" font-weight="600" fill="#64748b">S1</text>
+    <text x="240" y="542" text-anchor="middle" font-size="10" font-weight="600" fill="#64748b">S2</text>
+    <text x="305" y="542" text-anchor="middle" font-size="10" font-weight="600" fill="#64748b">S3</text>
+    <text x="370" y="542" text-anchor="middle" font-size="10" font-weight="600" fill="#64748b">S4</text>
+    <text x="435" y="542" text-anchor="middle" font-size="10" font-weight="600" fill="#64748b">S5</text>
+    <text x="500" y="542" text-anchor="middle" font-size="10" font-weight="600" fill="#64748b">S6</text>
+    <text x="565" y="542" text-anchor="middle" font-size="10" font-weight="600" fill="#64748b">S7</text>
+    <text x="630" y="542" text-anchor="middle" font-size="10" font-weight="600" fill="#64748b">S8</text>
+    <text x="695" y="542" text-anchor="middle" font-size="10" font-weight="600" fill="#64748b">S9</text>
+    <text x="760" y="542" text-anchor="middle" font-size="10" font-weight="700" fill="#10b981">S10</text>
+    <text x="835" y="542" text-anchor="middle" font-size="10" font-weight="700" fill="#38bdf8">FU1 (6w)</text>
+    <text x="905" y="542" text-anchor="middle" font-size="10" font-weight="700" fill="#a855f7">FU2 (12w)</text>
+
+    <!-- Phase Separators -->
+    <line x1="795" y1="100" x2="795" y2="520" stroke="#475569" stroke-width="1" stroke-dasharray="4,4" />
+    <text x="467" y="565" text-anchor="middle" font-size="11" font-weight="700" fill="#38bdf8">2-Week Intensive VR+Robotics Therapy (10 Sessions)</text>
+    <text x="870" y="565" text-anchor="middle" font-size="11" font-weight="700" fill="#a855f7">Follow-up Phase</text>
+
+    <!-- Participant Trajectories (Spaghetti Lines) -->
+    <!-- TR01: 1, 1, 1, 0, 1, 3, 1, 0, 0, 0, 0, 0, 8 -->
+    <polyline points="110,478 175,478 240,478 305,520 370,478 435,394 500,478 565,520 630,520 695,520 760,520 835,520 905,184" fill="none" stroke="#38bdf8" stroke-width="1.8" opacity="0.65" />
+
+    <!-- TR02: 7, 6, 9, 5, 4, 1, 5, 1, 6, 3, 0, 2, 5 -->
+    <polyline points="110,226 175,268 240,142 305,310 370,352 435,478 500,310 565,478 630,268 695,394 760,520 835,436 905,310" fill="none" stroke="#f59e0b" stroke-width="2.2" opacity="0.8" />
+
+    <!-- TR03: 3, 3, 2, 1, 2, 1, 0, 0, 1, 0, 0, 2, 1 -->
+    <polyline points="110,394 175,394 240,436 305,478 370,436 435,478 500,520 565,520 630,478 695,520 760,520 835,436 905,478" fill="none" stroke="#10b981" stroke-width="1.8" opacity="0.75" />
+
+    <!-- TR04 (Lost after S4): 1, 1, 0, 0, 0 -->
+    <polyline points="110,478 175,478 240,520 305,520 370,520" fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.6" />
+
+    <!-- TR05: 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0 -->
+    <polyline points="110,520 175,520 240,520 305,520 370,436 435,520 500,520 565,520 630,520 695,520 760,520 835,436 905,520" fill="none" stroke="#06b6d4" stroke-width="1.8" opacity="0.75" />
+
+    <!-- TR06: 4, 3, 4, 1, 2, 4, 2, 1, 4, 0, 1, 0, 0 -->
+    <polyline points="110,352 175,394 240,352 305,478 370,436 435,352 500,436 565,478 630,352 695,520 760,478 835,520 905,520" fill="none" stroke="#a855f7" stroke-width="2.2" opacity="0.8" />
+
+    <!-- TR07: 7, 6, 7, 5, 4, 3, 8, 4, 4, 3, 6, 7, 5 -->
+    <polyline points="110,226 175,268 240,226 305,310 370,352 435,394 500,184 565,352 630,352 695,394 760,268 835,226 905,310" fill="none" stroke="#ef4444" stroke-width="2.2" opacity="0.8" />
+
+    <!-- TR08: 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 -->
+    <polyline points="110,478 175,352 240,478 305,520 370,520 435,520 500,520 565,520 630,520 695,520 760,520 835,520 905,520" fill="none" stroke="#eab308" stroke-width="1.8" opacity="0.75" />
+
+    <!-- TR09: 2, 3, 2, 2, 5, 3, 1, 2, 1, 2, 1, 2, 0 -->
+    <polyline points="110,436 175,394 240,436 305,436 370,310 435,394 500,478 565,436 630,478 695,436 760,478 835,436 905,520" fill="none" stroke="#ec4899" stroke-width="1.8" opacity="0.75" />
+
+    <!-- GROUP MEAN (Thick White Solid Line)
+         Base: 3.12 (y=389)
+         S1: 3.33 (y=380)
+         S2: 3.33 (y=380)
+         S3: 1.78 (y=445)
+         S4: 2.11 (y=431)
+         S5: 2.00 (y=436)
+         S6: 2.12 (y=431)
+         S7: 1.12 (y=473)
+         S8: 2.00 (y=436)
+         S9: 1.00 (y=478)
+         S10: 1.00 (y=478)
+         FU1: 1.88 (y=441)
+         FU2: 2.38 (y=420)
+    -->
+    <polyline points="110,389 175,380 240,380 305,445 370,431 435,436 500,431 565,473 630,436 695,478 760,478 835,441 905,420" fill="none" stroke="#ffffff" stroke-width="4.5" />
+    <polyline points="110,389 175,380 240,380 305,445 370,431 435,436 500,431 565,473 630,436 695,478 760,478 835,441 905,420" fill="none" stroke="#38bdf8" stroke-width="2.5" />
+
+    <!-- Dots on Group Mean -->
+    <circle cx="110" cy="389" r="5" fill="#ffffff" stroke="#0b1329" stroke-width="2" />
+    <circle cx="760" cy="478" r="6" fill="#10b981" stroke="#ffffff" stroke-width="2.5" />
+    <circle cx="835" cy="441" r="5" fill="#38bdf8" stroke="#ffffff" stroke-width="2" />
+    <circle cx="905" cy="420" r="5" fill="#a855f7" stroke="#ffffff" stroke-width="2" />
+
+    <!-- Callout Box for S10 Reduction -->
+    <rect x="670" y="380" width="180" height="55" rx="6" fill="#0f172a" stroke="#10b981" stroke-width="1.5" />
+    <text x="760" y="402" text-anchor="middle" font-size="11" font-weight="800" fill="#10b981">Session 10: −68.0%</text>
+    <text x="760" y="422" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">Mean: 3.12 → 1.00 (p=0.016*)</text>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(90, 585)">
+    <line x1="0" y1="10" x2="30" y2="10" stroke="#ffffff" stroke-width="4" />
+    <text x="38" y="14" font-size="11" font-weight="800" fill="#ffffff">Cohort Mean</text>
+
+    <line x1="140" y1="10" x2="160" y2="10" stroke="#38bdf8" stroke-width="2" /><text x="165" y="14" font-size="10" fill="#94a3b8">TR01</text>
+    <line x1="210" y1="10" x2="230" y2="10" stroke="#f59e0b" stroke-width="2" /><text x="235" y="14" font-size="10" fill="#94a3b8">TR02</text>
+    <line x1="280" y1="10" x2="300" y2="10" stroke="#10b981" stroke-width="2" /><text x="305" y="14" font-size="10" fill="#94a3b8">TR03</text>
+    <line x1="350" y1="10" x2="370" y2="10" stroke="#64748b" stroke-width="2" stroke-dasharray="2,2" /><text x="375" y="14" font-size="10" fill="#64748b">TR04 (lost)</text>
+    <line x1="450" y1="10" x2="470" y2="10" stroke="#06b6d4" stroke-width="2" /><text x="475" y="14" font-size="10" fill="#94a3b8">TR05</text>
+    <line x1="520" y1="10" x2="540" y2="10" stroke="#a855f7" stroke-width="2" /><text x="545" y="14" font-size="10" fill="#94a3b8">TR06</text>
+    <line x1="590" y1="10" x2="610" y2="10" stroke="#ef4444" stroke-width="2" /><text x="615" y="14" font-size="10" fill="#94a3b8">TR07</text>
+    <line x1="660" y1="10" x2="680" y2="10" stroke="#eab308" stroke-width="2" /><text x="685" y="14" font-size="10" fill="#94a3b8">TR08</text>
+    <line x1="730" y1="10" x2="750" y2="10" stroke="#ec4899" stroke-width="2" /><text x="755" y="14" font-size="10" fill="#94a3b8">TR09</text>
+  </g>
+</svg>

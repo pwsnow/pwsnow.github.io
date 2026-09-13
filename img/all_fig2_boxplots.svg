@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="1000" height="600" style="background:#0b1329;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <text x="50" y="42" font-size="20" font-weight="800" fill="#f8fafc">Figure 2 — Comparative Boxplots: Control vs. Pooled Experimental Cohorts</text>
+  <text x="50" y="65" font-size="12" font-weight="600" fill="#94a3b8">Side-by-Side Distribution at Baseline and Post-Treatment (Control n=6 vs. Pooled VR+Robotics n=14)</text>
+
+  <g transform="translate(0, 0)">
+    <!-- Y Axis: 0 to 10 (height 380: y=110 to 490 -> 38px/unit) -->
+    <line x1="120" y1="490" x2="900" y2="490" stroke="#334155" stroke-width="1.5" />
+    <line x1="120" y1="414" x2="900" y2="414" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <line x1="120" y1="338" x2="900" y2="338" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <line x1="120" y1="262" x2="900" y2="262" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <line x1="120" y1="186" x2="900" y2="186" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+    <line x1="120" y1="110" x2="900" y2="110" stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3" />
+
+    <text x="105" y="494" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">0</text>
+    <text x="105" y="418" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">2</text>
+    <text x="105" y="342" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">4</text>
+    <text x="105" y="266" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">6</text>
+    <text x="105" y="190" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">8</text>
+    <text x="105" y="114" text-anchor="end" font-size="11" font-weight="600" fill="#94a3b8">10</text>
+    <text x="65" y="300" text-anchor="middle" font-size="12" font-weight="700" fill="#cbd5e1" transform="rotate(-90, 65, 300)">Normalized Pain Score (0–10)</text>
+
+    <!-- Column 1: Baseline Control (cx=220)
+         Q1=4.25 (y=328), Q3=5.75 (y=271), Med=5.0 (y=300)
+    -->
+    <line x1="220" y1="338" x2="220" y2="110" stroke="#38bdf8" stroke-width="2" />
+    <rect x="175" y="271" width="90" height="57" rx="4" fill="#38bdf8" opacity="0.2" stroke="#38bdf8" stroke-width="2" />
+    <line x1="175" y1="300" x2="265" y2="300" stroke="#38bdf8" stroke-width="3" />
+    <circle cx="210" cy="338" r="5" fill="#38bdf8" opacity="0.8" />
+    <circle cx="225" cy="300" r="5" fill="#38bdf8" opacity="0.8" />
+    <circle cx="235" cy="262" r="5" fill="#38bdf8" opacity="0.8" />
+    <circle cx="215" cy="300" r="5" fill="#38bdf8" opacity="0.8" />
+    <circle cx="205" cy="338" r="5" fill="#38bdf8" opacity="0.8" />
+    <circle cx="220" cy="110" r="5" fill="#38bdf8" opacity="0.8" />
+
+    <text x="220" y="520" text-anchor="middle" font-size="12" font-weight="700" fill="#38bdf8">Baseline: Control</text>
+    <text x="220" y="538" text-anchor="middle" font-size="11" font-weight="600" fill="#94a3b8">5.67 ± 2.25 (n=6)</text>
+
+    <!-- Column 2: Baseline Pooled Exp (cx=390)
+         Q1=2.0 (y=414), Q3=7.75 (y=195), Med=4.0 (y=338)
+    -->
+    <line x1="390" y1="414" x2="390" y2="110" stroke="#10b981" stroke-width="2" />
+    <rect x="345" y="195" width="90" height="219" rx="4" fill="#10b981" opacity="0.15" stroke="#10b981" stroke-width="2" />
+    <line x1="345" y1="338" x2="435" y2="338" stroke="#10b981" stroke-width="3" />
+    <!-- 14 points -->
+    <circle cx="375" cy="186" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="385" cy="300" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="395" cy="186" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="405" cy="148" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="380" cy="376" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="390" cy="110" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="400" cy="452" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="385" cy="224" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="395" cy="376" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="375" cy="490" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="385" cy="338" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="405" cy="224" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="395" cy="452" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="380" cy="414" r="4.5" fill="#10b981" opacity="0.8" />
+
+    <text x="390" y="520" text-anchor="middle" font-size="12" font-weight="700" fill="#10b981">Baseline: Exp (n=14)</text>
+    <text x="390" y="538" text-anchor="middle" font-size="11" font-weight="600" fill="#94a3b8">4.86 ± 3.30</text>
+
+    <!-- Column 3: Post-Tx Control (cx=610)
+         Q1=3.0 (y=376), Q3=4.75 (y=309), Med=3.5 (y=357)
+    -->
+    <line x1="610" y1="490" x2="610" y2="262" stroke="#38bdf8" stroke-width="2" />
+    <rect x="565" y="309" width="90" height="67" rx="4" fill="#38bdf8" opacity="0.25" stroke="#38bdf8" stroke-width="2" />
+    <line x1="565" y1="357" x2="655" y2="357" stroke="#38bdf8" stroke-width="3" />
+    <circle cx="600" cy="376" r="5" fill="#38bdf8" opacity="0.8" />
+    <circle cx="615" cy="338" r="5" fill="#38bdf8" opacity="0.8" />
+    <circle cx="625" cy="490" r="5" fill="#38bdf8" opacity="0.8" />
+    <circle cx="605" cy="376" r="5" fill="#38bdf8" opacity="0.8" />
+    <circle cx="615" cy="300" r="5" fill="#38bdf8" opacity="0.8" />
+    <circle cx="620" cy="262" r="5" fill="#38bdf8" opacity="0.8" />
+
+    <text x="610" y="520" text-anchor="middle" font-size="12" font-weight="700" fill="#38bdf8">Post-Tx: Control</text>
+    <text x="610" y="538" text-anchor="middle" font-size="11" font-weight="600" fill="#38bdf8">3.50 ± 2.07 (−33%)</text>
+
+    <!-- Column 4: Post-Tx Pooled Exp (cx=780)
+         Q1=0.0 (y=490), Q3=2.0 (y=414), Med=0.5 (y=471)
+    -->
+    <line x1="780" y1="414" x2="780" y2="262" stroke="#10b981" stroke-width="2" />
+    <rect x="735" y="414" width="90" height="76" rx="4" fill="#10b981" opacity="0.3" stroke="#10b981" stroke-width="2" />
+    <line x1="735" y1="471" x2="825" y2="471" stroke="#10b981" stroke-width="3" />
+    <!-- 7 participants at 0! -->
+    <circle cx="765" cy="490" r="5" fill="#10b981" opacity="0.9" />
+    <circle cx="775" cy="490" r="5" fill="#10b981" opacity="0.9" />
+    <circle cx="785" cy="490" r="5" fill="#10b981" opacity="0.9" />
+    <circle cx="795" cy="490" r="5" fill="#10b981" opacity="0.9" />
+    <circle cx="770" cy="490" r="5" fill="#10b981" opacity="0.9" />
+    <circle cx="780" cy="490" r="5" fill="#10b981" opacity="0.9" />
+    <circle cx="790" cy="490" r="5" fill="#10b981" opacity="0.9" />
+    <!-- Non-zero points -->
+    <circle cx="770" cy="452" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="780" cy="452" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="790" cy="452" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="775" cy="414" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="785" cy="338" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="795" cy="262" r="4.5" fill="#10b981" opacity="0.8" />
+    <circle cx="775" cy="262" r="4.5" fill="#10b981" opacity="0.8" />
+
+    <text x="780" y="520" text-anchor="middle" font-size="12" font-weight="700" fill="#10b981">Post-Tx: Exp (n=14)</text>
+    <text x="780" y="538" text-anchor="middle" font-size="11" font-weight="700" fill="#10b981">1.50 ± 2.21 (−64%)</text>
+
+    <!-- Significance Brackets -->
+    <!-- Within-Exp Bracket -->
+    <line x1="390" y1="80" x2="780" y2="80" stroke="#10b981" stroke-width="2" />
+    <line x1="390" y1="80" x2="390" y2="95" stroke="#10b981" stroke-width="2" />
+    <line x1="780" y1="80" x2="780" y2="95" stroke="#10b981" stroke-width="2" />
+    <rect x="525" y="65" width="120" height="24" rx="4" fill="#0b1329" stroke="#10b981" stroke-width="1.5" />
+    <text x="585" y="81" text-anchor="middle" font-size="11" font-weight="900" fill="#10b981">Wilcoxon p = 0.003 **</text>
+  </g>
+</svg>
